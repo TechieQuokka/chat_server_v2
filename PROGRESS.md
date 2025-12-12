@@ -400,16 +400,86 @@ Progress: 35/35 COMPLETE
 
 Progress: 6/6 COMPLETE (OpenAPI deferred to separate PR)
 
-## Phase 8: chat-gateway (WebSocket)
-- [ ] WebSocket server setup
-- [ ] Connection manager (DashMap)
-- [ ] Session & heartbeat handling
-- [ ] Op handlers: Identify, Resume, Heartbeat, PresenceUpdate
-- [ ] Event dispatcher via Redis Pub/Sub
-- [ ] All gateway events per websocket.md
-- [ ] Session resume (2min window)
+## Phase 8: chat-gateway (WebSocket) ✅
 
-Progress: 0/7
+### Protocol Module
+- [x] OpCode enum (0-11): Dispatch, Heartbeat, Identify, PresenceUpdate, Resume, Reconnect, InvalidSession, Hello, HeartbeatAck
+- [x] CloseCode enum (4000-4012): UnknownError, UnknownOpCode, DecodeError, NotAuthenticated, AuthenticationFailed, AlreadyAuthenticated, InvalidSeq, RateLimited, SessionTimeout, InvalidShard, ShardingRequired, InvalidApiVersion, InvalidIntents
+- [x] GatewayMessage: op, t (event type), s (sequence), d (data)
+  - Factory methods: hello, heartbeat_ack, dispatch, invalid_session, reconnect
+  - JSON serialization/deserialization with serde
+- [x] Payloads: HelloPayload, IdentifyPayload, ResumePayload, PresenceUpdatePayload
+  - IdentifyProperties for client metadata (os, browser, device)
+
+### Events Module
+- [x] GatewayEventType enum: Ready, Resumed, GuildCreate, GuildUpdate, GuildDelete, ChannelCreate, ChannelUpdate, ChannelDelete, MessageCreate, MessageUpdate, MessageDelete, GuildMemberAdd, GuildMemberRemove, GuildMemberUpdate, PresenceUpdate, TypingStart, GuildRoleCreate, GuildRoleUpdate, GuildRoleDelete, MessageReactionAdd, MessageReactionRemove
+- [x] Event payloads: ReadyEvent, ResumedEvent, GuildCreateEvent, GuildDeleteEvent, ChannelPayload, MessageCreateEvent, PresenceEvent, TypingStartEvent, MemberEvent, RolePayload, UserPayload, UnavailableGuild
+
+### Connection Module
+- [x] Connection: session_id, state, sender, sequence, user_id, guilds
+  - Heartbeat tracking with last_heartbeat, heartbeat_acked
+  - send(), next_sequence(), set_sequence() methods
+  - State transitions: Connecting → Identifying → Connected → Disconnected
+- [x] ConnectionManager: DashMap-based concurrent connection storage
+  - connections: DashMap<session_id, Arc<Connection>>
+  - user_connections: DashMap<user_id, HashSet<session_id>>
+  - guild_connections: DashMap<guild_id, HashSet<session_id>>
+  - add_connection, remove_connection, authenticate_connection
+  - subscribe_to_guild, unsubscribe_from_guild
+  - get_user_connections, get_guild_connections
+- [x] Session helper: create, get, update, delete, resume
+  - Redis-backed session storage via WebSocketSessionStore
+  - 2-minute resume window via mark_disconnected
+  - Event queue for missed events (up to 1000 per session)
+
+### Handlers Module
+- [x] MessageDispatcher: Routes messages by OpCode to handlers
+- [x] HandlerError: InvalidPayload, AuthenticationFailed, NotAuthenticated, AlreadyAuthenticated, SessionError, ServiceError, DomainError, CacheError, Internal
+  - to_close_code() for protocol close code mapping
+- [x] HeartbeatHandler (op 1): Update last_heartbeat, send HeartbeatAck
+- [x] IdentifyHandler (op 2): Token validation, session creation
+  - JWT validation via JwtService
+  - User lookup, guild subscriptions
+  - READY event dispatch with guilds list
+  - GUILD_CREATE events for each guild
+  - Presence set to Online
+- [x] ResumeHandler (op 4): Session resume within 2-minute window
+  - Replay missed events from session queue
+  - Restore sequence number and guild subscriptions
+  - Send RESUMED event
+- [x] PresenceHandler (op 3): Update user presence
+  - Status validation (online, idle, dnd, offline)
+  - Redis presence update
+  - Pub/Sub broadcast to user's guilds
+
+### Broadcast Module
+- [x] EventDispatcher: Redis Pub/Sub to WebSocket routing
+  - Background subscriber loop
+  - Channel subscription for guilds
+  - dispatch_event(): Route to local connections
+  - dispatch_to_guild(): Send to all guild members
+  - dispatch_to_user(): Send to all user's connections
+  - Sequence number assignment
+- [x] EventDispatcherConfig: channel_buffer_size, max_retry_attempts
+
+### Server Module
+- [x] GatewayState: ServiceContext, ConnectionManager, EventDispatcher, AppConfig
+- [x] gateway_handler(): WebSocket upgrade handler
+  - Hello message on connect (45s heartbeat interval)
+  - Receive/Send/Heartbeat tasks via tokio::select!
+  - Text message parsing and dispatch to handlers
+  - Binary message rejection (DecodeError)
+  - Connection cleanup on disconnect
+- [x] Heartbeat monitoring: 90s timeout, zombie detection
+- [x] create_app(): Router with /gateway endpoint
+- [x] create_gateway_state(): Initialize all dependencies
+- [x] run(): Full gateway server startup
+
+### Entry Point
+- [x] main.rs: Tracing initialization, config loading, server startup
+- [x] lib.rs: Public API exports (run, all types)
+
+Progress: 7/7 COMPLETE
 
 ## Phase 9: Integration & Docker
 - [ ] Integration tests
@@ -422,8 +492,8 @@ Progress: 0/5
 
 ---
 
-**Overall Progress: Phase 7 of 9 COMPLETE**
+**Overall Progress: Phase 8 of 9 COMPLETE**
 
 **Database**: postgresql://postgres:***@localhost:5432/chat_db (14 tables)
 
-**Last Updated:** 2025-12-12
+**Last Updated:** 2025-12-13
