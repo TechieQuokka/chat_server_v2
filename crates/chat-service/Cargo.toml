@@ -32,9 +32,19 @@ tracing = { workspace = true }
 
 # Error handling
 thiserror = { workspace = true }
+anyhow = { workspace = true }
 
 # Time
 chrono = { workspace = true }
+
+# Random (for invite code generation)
+rand = { workspace = true }
+
+# Database
+sqlx = { workspace = true }
+
+# UUID
+uuid = { workspace = true }
 
 [dev-dependencies]
 tokio = { workspace = true }

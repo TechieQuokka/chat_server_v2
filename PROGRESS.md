@@ -177,15 +177,91 @@ Progress: 5/5 COMPLETE
 
 Progress: 4/4 COMPLETE
 
-## Phase 6: chat-service (Business Logic)
-- [ ] AuthService, PermissionService
-- [ ] UserService, GuildService, ChannelService
-- [ ] MessageService, MemberService, RoleService
-- [ ] ReactionService, InviteService, DmService
-- [ ] PresenceService
-- [ ] Request/Response DTOs
+## Phase 6: chat-service (Business Logic) ✅
 
-Progress: 0/6
+### DTOs (Request/Response)
+- [x] requests.rs: Auth (Register, Login, RefreshToken, Logout)
+- [x] requests.rs: User (UpdateUser)
+- [x] requests.rs: Guild (CreateGuild, UpdateGuild)
+- [x] requests.rs: Channel (CreateChannel, UpdateChannel)
+- [x] requests.rs: Message (CreateMessage, UpdateMessage, MessageReference)
+- [x] requests.rs: Role (CreateRole, UpdateRole, UpdateRolePositions)
+- [x] requests.rs: Member (UpdateMember)
+- [x] requests.rs: Invite (CreateInvite)
+- [x] requests.rs: Presence (UpdatePresence, TypingRequest)
+- [x] requests.rs: DM (CreateDm)
+- [x] responses.rs: Auth (AuthResponse, TokenPairResponse)
+- [x] responses.rs: User (UserResponse)
+- [x] responses.rs: Guild (GuildResponse, GuildWithCountsResponse)
+- [x] responses.rs: Channel (ChannelResponse, DmChannelResponse)
+- [x] responses.rs: Message (MessageResponse, AttachmentResponse, ReactionResponse)
+- [x] responses.rs: Role (RoleResponse)
+- [x] responses.rs: Member (MemberResponse)
+- [x] responses.rs: Invite (InviteResponse)
+- [x] responses.rs: Presence (PresenceResponse)
+- [x] responses.rs: Common (PaginatedResponse, PaginationMeta)
+- [x] mappers.rs: Entity → Response mappings with helper types
+  - GuildWithCounts, InviteWithDetails, MemberWithUser
+  - MessageWithDetails, DmChannelWithRecipients
+
+### Services
+- [x] AuthService: register, login, refresh_tokens, logout, validate_token
+  - Password hashing with Argon2, JWT token generation
+  - Session management with refresh token storage
+- [x] PermissionService: check_permission, require_permission, get_member_permissions
+  - Administrator bypass, role hierarchy checks
+  - can_manage_member, can_assign_role
+  - compute_channel_permissions (MVP without overwrites)
+- [x] UserService: get_user, get_current_user, update_user, delete_user
+  - User lookup by ID, search by username/email
+- [x] GuildService: create_guild, get_guild, update_guild, delete_guild, get_user_guilds
+  - Owner transfers, member counts, default role/channel creation
+  - Redis Pub/Sub event publishing
+- [x] ChannelService: create_channel, get_channel, update_channel, delete_channel, get_guild_channels
+  - Category support, position management
+  - Redis Pub/Sub event publishing
+- [x] MessageService: create_message, get_message, update_message, delete_message
+  - get_channel_messages with pagination, bulk_delete
+  - Reply support with message_reference
+  - Redis Pub/Sub event publishing
+- [x] MemberService: add_member, get_member, update_member, remove_member
+  - get_guild_members with pagination, kick_member, ban_member
+  - Role hierarchy enforcement
+  - Redis Pub/Sub event publishing
+- [x] RoleService: create_role, get_role, update_role, delete_role
+  - get_guild_roles, update_positions
+  - Role hierarchy enforcement
+  - Redis Pub/Sub event publishing
+- [x] ReactionService: add_reaction, remove_reaction, get_reactions
+  - remove_all_reactions, remove_all_reactions_for_emoji
+  - get_reaction_users with pagination
+  - Redis Pub/Sub event publishing
+- [x] InviteService: create_invite, get_invite, delete_invite, use_invite
+  - get_guild_invites, get_channel_invites
+  - Expiration and max uses validation
+  - Redis Pub/Sub event publishing
+- [x] DmService: create_dm, get_dm_channel, get_user_dms, close_dm
+  - Reuses existing DM channels
+  - Redis Pub/Sub event publishing
+- [x] PresenceService: update_presence, get_presence, get_presences
+  - set_online, set_offline, is_online
+  - get_guild_presences, get_online_count
+  - Redis Pub/Sub event publishing
+
+### Service Context & Error Handling
+- [x] ServiceContext: Holds all repositories and cache stores
+  - ServiceContextBuilder for dependency injection
+  - Repository accessors, cache store accessors
+  - Snowflake ID generator
+- [x] ServiceError: Custom error type for service layer
+  - not_found, permission_denied, validation, conflict, internal
+  - Conversion from chat_core::DomainError
+  - Conversion to chat_common::AppError
+- [x] Event publishing integration with Redis Pub/Sub
+  - PubSubEvent::new() pattern across all services
+  - Guild, Channel, User pub/sub channels
+
+Progress: 35/35 COMPLETE
 
 ## Phase 7: chat-api (REST API)
 - [ ] Axum server + middleware stack
@@ -219,7 +295,7 @@ Progress: 0/5
 
 ---
 
-**Overall Progress: Phase 5 of 9 COMPLETE**
+**Overall Progress: Phase 6 of 9 COMPLETE**
 
 **Database**: postgresql://postgres:***@localhost:5432/chat_db (14 tables)
 
