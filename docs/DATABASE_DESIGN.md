@@ -127,9 +127,9 @@ erDiagram
         varchar avatar
         boolean bot
         boolean system
-        timestamptz created_at
-        timestamptz updated_at
-        timestamptz deleted_at
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
     }
 
     guilds {
@@ -138,22 +138,22 @@ erDiagram
         varchar icon
         text description
         bigint owner_id FK
-        timestamptz created_at
-        timestamptz updated_at
-        timestamptz deleted_at
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
     }
 
     channels {
         bigint id PK
         bigint guild_id FK
         varchar name
-        channel_type type
+        varchar type
         text topic
         integer position
         bigint parent_id FK
-        timestamptz created_at
-        timestamptz updated_at
-        timestamptz deleted_at
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
     }
 
     messages {
@@ -161,9 +161,9 @@ erDiagram
         bigint channel_id FK
         bigint author_id FK
         text content
-        timestamptz created_at
-        timestamptz edited_at
-        timestamptz deleted_at
+        timestamp created_at
+        timestamp edited_at
+        timestamp deleted_at
         bigint reference_id FK
     }
 
@@ -177,31 +177,31 @@ erDiagram
         bigint permissions
         boolean mentionable
         boolean is_everyone
-        timestamptz created_at
-        timestamptz updated_at
-        timestamptz deleted_at
+        timestamp created_at
+        timestamp updated_at
+        timestamp deleted_at
     }
 
     guild_members {
-        bigint guild_id PK_FK
-        bigint user_id PK_FK
+        bigint guild_id PK "FK to guilds"
+        bigint user_id PK "FK to users"
         varchar nickname
-        timestamptz joined_at
-        timestamptz updated_at
+        timestamp joined_at
+        timestamp updated_at
     }
 
     member_roles {
-        bigint guild_id PK_FK
-        bigint user_id PK_FK
-        bigint role_id PK_FK
-        timestamptz assigned_at
+        bigint guild_id PK "FK to guild_members"
+        bigint user_id PK "FK to guild_members"
+        bigint role_id PK "FK to roles"
+        timestamp assigned_at
     }
 
     reactions {
-        bigint message_id PK_FK
-        bigint user_id PK_FK
+        bigint message_id PK "FK to messages"
+        bigint user_id PK "FK to users"
         varchar emoji PK
-        timestamptz created_at
+        timestamp created_at
     }
 
     attachments {
@@ -214,7 +214,7 @@ erDiagram
         varchar proxy_url
         integer width
         integer height
-        timestamptz created_at
+        timestamp created_at
     }
 
     invites {
@@ -226,44 +226,44 @@ erDiagram
         integer max_uses
         integer max_age
         boolean temporary
-        timestamptz created_at
-        timestamptz expires_at
-        timestamptz deleted_at
+        timestamp created_at
+        timestamp expires_at
+        timestamp deleted_at
     }
 
     bans {
-        bigint guild_id PK_FK
-        bigint user_id PK_FK
+        bigint guild_id PK "FK to guilds"
+        bigint user_id PK "FK to users"
         text reason
         bigint banned_by FK
-        timestamptz created_at
+        timestamp created_at
     }
 
     audit_logs {
         bigint id PK
         bigint guild_id FK
         bigint user_id FK
-        audit_action action
+        varchar action
         bigint target_id
         varchar target_type
         jsonb changes
         text reason
-        timestamptz created_at
+        timestamp created_at
     }
 
     refresh_tokens {
         bigint id PK
         bigint user_id FK
         varchar token_hash UK
-        timestamptz expires_at
-        timestamptz created_at
-        timestamptz revoked_at
+        timestamp expires_at
+        timestamp created_at
+        timestamp revoked_at
     }
 
     dm_channel_recipients {
-        bigint channel_id PK_FK
-        bigint user_id PK_FK
-        timestamptz created_at
+        bigint channel_id PK "FK to channels"
+        bigint user_id PK "FK to users"
+        timestamp created_at
     }
 ```
 
