@@ -18,14 +18,23 @@ use chat_service::ServiceContextBuilder;
 use tokio::net::TcpListener;
 use tracing::info;
 
-use crate::middleware::apply_middleware;
+use crate::middleware::apply_middleware_with_config;
 use crate::routes::create_router;
 use crate::state::AppState;
 
 /// Build the complete Axum application with all routes and middleware
+///
+/// Uses the new `apply_middleware_with_config` to enable rate limiting
+/// and environment-aware CORS configuration.
 pub fn create_app(state: AppState) -> Router {
     let router = create_router();
-    let router = apply_middleware(router);
+    let is_production = state.config().app.env.is_production();
+    let router = apply_middleware_with_config(
+        router,
+        &state.config().rate_limit,
+        &state.config().cors,
+        is_production,
+    );
     router.with_state(state)
 }
 

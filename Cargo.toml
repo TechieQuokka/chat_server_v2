@@ -42,7 +42,9 @@ tower-http = { version = "0.6", features = ["cors", "trace", "request-id", "comp
 tokio-tungstenite = "0.24"
 
 # Database
-sqlx = { version = "0.8", features = ["runtime-tokio", "tls-rustls", "postgres", "chrono", "json", "migrate"] }
+# Note: default-features = false to exclude macros (which pulls in MySQL and the vulnerable rsa crate)
+# We still enable derive for FromRow, but not the full macros feature
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "tls-rustls", "postgres", "chrono", "json", "migrate", "derive"] }
 
 # Redis
 redis = { version = "0.27", features = ["tokio-comp", "connection-manager"] }
@@ -53,7 +55,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 
 # Validation
-validator = { version = "0.18", features = ["derive"] }
+validator = { version = "0.20", features = ["derive"] }
 
 # Error handling
 thiserror = "2.0"
@@ -85,6 +87,10 @@ parking_lot = "0.12"
 bitflags = "2.6"
 rand = "0.8"
 base64 = "0.22"
+
+# Rate limiting
+tower_governor = "0.4"
+governor = "0.7"
 
 # OpenAPI
 utoipa = { version = "5", features = ["axum_extras", "chrono"] }

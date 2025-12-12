@@ -1,0 +1,12 @@
+# Cargo audit configuration
+# See: https://rustsec.org/
+
+[advisories]
+# RUSTSEC-2023-0071: rsa crate Marvin Attack vulnerability
+# This is pulled in by sqlx-macros-core -> sqlx-mysql even though we only use PostgreSQL.
+# This is a known architectural issue with sqlx 0.8.x where the macro system includes
+# all database drivers. The rsa crate is only used for MySQL authentication, which
+# we do not use. This advisory can be safely ignored for this project.
+#
+# Tracked upstream: https://github.com/launchbadge/sqlx/issues/2911
+ignore = ["RUSTSEC-2023-0071"]

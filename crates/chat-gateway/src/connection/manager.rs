@@ -56,37 +56,33 @@ impl ConnectionManager {
     }
 
     /// Remove a connection
+    ///
+    /// Uses `alter` for atomic modify-and-cleanup operations to avoid TOCTOU race conditions.
     pub async fn remove_connection(&self, session_id: &str) {
         if let Some((_, connection)) = self.connections.remove(session_id) {
             // Remove from user mapping
             if let Some(user_id) = connection.user_id().await {
-                self.user_connections.entry(user_id).and_modify(|sessions| {
+                // Atomically modify the sessions set
+                self.user_connections.alter(&user_id, |_, mut sessions| {
                     sessions.remove(session_id);
+                    sessions
                 });
 
-                // Clean up empty user entry
-                if let Some(entry) = self.user_connections.get(&user_id) {
-                    if entry.is_empty() {
-                        drop(entry);
-                        self.user_connections.remove(&user_id);
-                    }
-                }
+                // Clean up empty entry - use retain for atomic removal
+                self.user_connections.retain(|_, sessions| !sessions.is_empty());
             }
 
             // Remove from guild mappings
             for guild_id in connection.guilds().await {
-                self.guild_connections.entry(guild_id).and_modify(|sessions| {
+                // Atomically modify the sessions set
+                self.guild_connections.alter(&guild_id, |_, mut sessions| {
                     sessions.remove(session_id);
+                    sessions
                 });
-
-                // Clean up empty guild entry
-                if let Some(entry) = self.guild_connections.get(&guild_id) {
-                    if entry.is_empty() {
-                        drop(entry);
-                        self.guild_connections.remove(&guild_id);
-                    }
-                }
             }
+
+            // Clean up all empty guild entries atomically
+            self.guild_connections.retain(|_, sessions| !sessions.is_empty());
 
             tracing::debug!(session_id = %session_id, "Connection removed");
         }
@@ -144,13 +140,20 @@ impl ConnectionManager {
     }
 
     /// Unsubscribe a connection from a guild
+    ///
+    /// Uses atomic operations to avoid race conditions when cleaning up empty guild mappings.
     pub async fn unsubscribe_from_guild(&self, session_id: &str, guild_id: Snowflake) -> bool {
         if let Some(connection) = self.connections.get(session_id) {
             connection.unsubscribe_guild(guild_id).await;
 
-            self.guild_connections.entry(guild_id).and_modify(|sessions| {
+            // Atomically modify the sessions set
+            self.guild_connections.alter(&guild_id, |_, mut sessions| {
                 sessions.remove(session_id);
+                sessions
             });
+
+            // Clean up empty entry
+            self.guild_connections.retain(|_, sessions| !sessions.is_empty());
 
             tracing::trace!(
                 session_id = %session_id,

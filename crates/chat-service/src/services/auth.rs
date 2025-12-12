@@ -3,7 +3,7 @@
 //! Handles user registration, login, token refresh, and logout.
 
 use chat_cache::RefreshTokenData;
-use chat_common::auth::{hash_password, verify_password};
+use chat_common::auth::{hash_password, validate_password_strength, verify_password};
 use uuid::Uuid;
 use chat_core::entities::User;
 use chat_core::Snowflake;
@@ -31,6 +31,9 @@ impl<'a> AuthService<'a> {
     /// Register a new user
     #[instrument(skip(self, request), fields(username = %request.username, email = %request.email))]
     pub async fn register(&self, request: RegisterRequest) -> ServiceResult<AuthResponse> {
+        // Validate password strength before proceeding
+        validate_password_strength(&request.password).map_err(ServiceError::from)?;
+
         // Check if email already exists
         if self.ctx.user_repo().email_exists(&request.email).await? {
             return Err(ServiceError::conflict("Email already registered"));
