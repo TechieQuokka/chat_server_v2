@@ -111,13 +111,13 @@ pub async fn run_server(app: Router, addr: SocketAddr) -> Result<(), AppError> {
 
     let listener = TcpListener::bind(addr)
         .await
-        .map_err(|e| AppError::Config(format!("Failed to bind to {}: {}", addr, e)))?;
+        .map_err(|e| AppError::Config(format!("Failed to bind to {addr}: {e}")))?;
 
     info!("Server listening on http://{}", addr);
 
     axum::serve(listener, app)
         .await
-        .map_err(|e| AppError::Config(format!("Server error: {}", e)))?;
+        .map_err(|e| AppError::Config(format!("Server error: {e}")))?;
 
     Ok(())
 }

@@ -35,11 +35,11 @@ impl ReactionRepository for PgReactionRepository {
         emoji: &str,
     ) -> RepoResult<Option<Reaction>> {
         let result = sqlx::query_as::<_, ReactionModel>(
-            r#"
+            r"
             SELECT message_id, user_id, emoji, created_at
             FROM reactions
             WHERE message_id = $1 AND user_id = $2 AND emoji = $3
-            "#,
+            ",
         )
         .bind(message_id.into_inner())
         .bind(user_id.into_inner())
@@ -54,12 +54,12 @@ impl ReactionRepository for PgReactionRepository {
     #[instrument(skip(self))]
     async fn find_by_message(&self, message_id: Snowflake) -> RepoResult<Vec<Reaction>> {
         let results = sqlx::query_as::<_, ReactionModel>(
-            r#"
+            r"
             SELECT message_id, user_id, emoji, created_at
             FROM reactions
             WHERE message_id = $1
             ORDER BY created_at
-            "#,
+            ",
         )
         .bind(message_id.into_inner())
         .fetch_all(&self.pool)
@@ -79,13 +79,13 @@ impl ReactionRepository for PgReactionRepository {
         let limit = limit.clamp(1, 100);
 
         let results = sqlx::query_scalar::<_, i64>(
-            r#"
+            r"
             SELECT user_id
             FROM reactions
             WHERE message_id = $1 AND emoji = $2
             ORDER BY created_at
             LIMIT $3
-            "#,
+            ",
         )
         .bind(message_id.into_inner())
         .bind(emoji)
@@ -100,11 +100,11 @@ impl ReactionRepository for PgReactionRepository {
     #[instrument(skip(self))]
     async fn create(&self, reaction: &Reaction) -> RepoResult<()> {
         sqlx::query(
-            r#"
+            r"
             INSERT INTO reactions (message_id, user_id, emoji, created_at)
             VALUES ($1, $2, $3, $4)
             ON CONFLICT (message_id, user_id, emoji) DO NOTHING
-            "#,
+            ",
         )
         .bind(reaction.message_id.into_inner())
         .bind(reaction.user_id.into_inner())
@@ -120,9 +120,9 @@ impl ReactionRepository for PgReactionRepository {
     #[instrument(skip(self))]
     async fn delete(&self, message_id: Snowflake, user_id: Snowflake, emoji: &str) -> RepoResult<()> {
         sqlx::query(
-            r#"
+            r"
             DELETE FROM reactions WHERE message_id = $1 AND user_id = $2 AND emoji = $3
-            "#,
+            ",
         )
         .bind(message_id.into_inner())
         .bind(user_id.into_inner())
@@ -137,9 +137,9 @@ impl ReactionRepository for PgReactionRepository {
     #[instrument(skip(self))]
     async fn delete_all(&self, message_id: Snowflake) -> RepoResult<()> {
         sqlx::query(
-            r#"
+            r"
             DELETE FROM reactions WHERE message_id = $1
-            "#,
+            ",
         )
         .bind(message_id.into_inner())
         .execute(&self.pool)
@@ -152,9 +152,9 @@ impl ReactionRepository for PgReactionRepository {
     #[instrument(skip(self))]
     async fn delete_by_emoji(&self, message_id: Snowflake, emoji: &str) -> RepoResult<()> {
         sqlx::query(
-            r#"
+            r"
             DELETE FROM reactions WHERE message_id = $1 AND emoji = $2
-            "#,
+            ",
         )
         .bind(message_id.into_inner())
         .bind(emoji)
@@ -168,13 +168,13 @@ impl ReactionRepository for PgReactionRepository {
     #[instrument(skip(self))]
     async fn count_by_emoji(&self, message_id: Snowflake) -> RepoResult<Vec<(String, i64)>> {
         let results = sqlx::query_as::<_, ReactionCountModel>(
-            r#"
+            r"
             SELECT emoji, COUNT(*) as count
             FROM reactions
             WHERE message_id = $1
             GROUP BY emoji
             ORDER BY count DESC
-            "#,
+            ",
         )
         .bind(message_id.into_inner())
         .fetch_all(&self.pool)

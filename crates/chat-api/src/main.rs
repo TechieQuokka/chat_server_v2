@@ -14,7 +14,7 @@ use tracing::{error, info};
 async fn main() {
     // Initialize tracing
     if let Err(e) = try_init_tracing() {
-        eprintln!("Warning: Failed to initialize tracing: {}", e);
+        eprintln!("Warning: Failed to initialize tracing: {e}");
     }
 
     // Run the server

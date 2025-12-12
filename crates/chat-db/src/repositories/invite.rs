@@ -31,12 +31,12 @@ impl InviteRepository for PgInviteRepository {
     #[instrument(skip(self))]
     async fn find_by_code(&self, code: &str) -> RepoResult<Option<Invite>> {
         let result = sqlx::query_as::<_, InviteModel>(
-            r#"
+            r"
             SELECT code, guild_id, channel_id, inviter_id, uses, max_uses, max_age,
                    temporary, created_at, expires_at, deleted_at
             FROM invites
             WHERE code = $1 AND deleted_at IS NULL
-            "#,
+            ",
         )
         .bind(code)
         .fetch_optional(&self.pool)
@@ -49,13 +49,13 @@ impl InviteRepository for PgInviteRepository {
     #[instrument(skip(self))]
     async fn find_by_guild(&self, guild_id: Snowflake) -> RepoResult<Vec<Invite>> {
         let results = sqlx::query_as::<_, InviteModel>(
-            r#"
+            r"
             SELECT code, guild_id, channel_id, inviter_id, uses, max_uses, max_age,
                    temporary, created_at, expires_at, deleted_at
             FROM invites
             WHERE guild_id = $1 AND deleted_at IS NULL
             ORDER BY created_at DESC
-            "#,
+            ",
         )
         .bind(guild_id.into_inner())
         .fetch_all(&self.pool)
@@ -68,13 +68,13 @@ impl InviteRepository for PgInviteRepository {
     #[instrument(skip(self))]
     async fn find_by_channel(&self, channel_id: Snowflake) -> RepoResult<Vec<Invite>> {
         let results = sqlx::query_as::<_, InviteModel>(
-            r#"
+            r"
             SELECT code, guild_id, channel_id, inviter_id, uses, max_uses, max_age,
                    temporary, created_at, expires_at, deleted_at
             FROM invites
             WHERE channel_id = $1 AND deleted_at IS NULL
             ORDER BY created_at DESC
-            "#,
+            ",
         )
         .bind(channel_id.into_inner())
         .fetch_all(&self.pool)
@@ -87,13 +87,13 @@ impl InviteRepository for PgInviteRepository {
     #[instrument(skip(self))]
     async fn find_by_inviter(&self, inviter_id: Snowflake) -> RepoResult<Vec<Invite>> {
         let results = sqlx::query_as::<_, InviteModel>(
-            r#"
+            r"
             SELECT code, guild_id, channel_id, inviter_id, uses, max_uses, max_age,
                    temporary, created_at, expires_at, deleted_at
             FROM invites
             WHERE inviter_id = $1 AND deleted_at IS NULL
             ORDER BY created_at DESC
-            "#,
+            ",
         )
         .bind(inviter_id.into_inner())
         .fetch_all(&self.pool)
@@ -106,11 +106,11 @@ impl InviteRepository for PgInviteRepository {
     #[instrument(skip(self))]
     async fn create(&self, invite: &Invite) -> RepoResult<()> {
         sqlx::query(
-            r#"
+            r"
             INSERT INTO invites (code, guild_id, channel_id, inviter_id, max_uses, max_age,
                                 temporary, created_at, expires_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-            "#,
+            ",
         )
         .bind(&invite.code)
         .bind(invite.guild_id.into_inner())
@@ -131,11 +131,11 @@ impl InviteRepository for PgInviteRepository {
     #[instrument(skip(self))]
     async fn increment_uses(&self, code: &str) -> RepoResult<()> {
         let result = sqlx::query(
-            r#"
+            r"
             UPDATE invites
             SET uses = uses + 1
             WHERE code = $1 AND deleted_at IS NULL
-            "#,
+            ",
         )
         .bind(code)
         .execute(&self.pool)
@@ -152,11 +152,11 @@ impl InviteRepository for PgInviteRepository {
     #[instrument(skip(self))]
     async fn delete(&self, code: &str) -> RepoResult<()> {
         let result = sqlx::query(
-            r#"
+            r"
             UPDATE invites
             SET deleted_at = NOW()
             WHERE code = $1 AND deleted_at IS NULL
-            "#,
+            ",
         )
         .bind(code)
         .execute(&self.pool)
@@ -173,14 +173,14 @@ impl InviteRepository for PgInviteRepository {
     #[instrument(skip(self))]
     async fn delete_expired(&self, guild_id: Snowflake) -> RepoResult<u64> {
         let result = sqlx::query(
-            r#"
+            r"
             UPDATE invites
             SET deleted_at = NOW()
             WHERE guild_id = $1
               AND deleted_at IS NULL
               AND expires_at IS NOT NULL
               AND expires_at < NOW()
-            "#,
+            ",
         )
         .bind(guild_id.into_inner())
         .execute(&self.pool)

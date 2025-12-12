@@ -179,7 +179,7 @@ impl<'de> Deserialize<'de> for Permissions {
 
         struct PermissionsVisitor;
 
-        impl<'de> Visitor<'de> for PermissionsVisitor {
+        impl Visitor<'_> for PermissionsVisitor {
             type Value = Permissions;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {

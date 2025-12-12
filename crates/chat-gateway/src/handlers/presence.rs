@@ -19,15 +19,12 @@ impl PresenceHandler {
         payload: PresenceUpdatePayload,
     ) -> HandlerResult<Option<CloseCode>> {
         // Must be authenticated
-        let user_id = match connection.user_id().await {
-            Some(id) => id,
-            None => {
-                tracing::warn!(
-                    session_id = %connection.session_id(),
-                    "Presence update from unauthenticated client"
-                );
-                return Ok(Some(CloseCode::NotAuthenticated));
-            }
+        let user_id = if let Some(id) = connection.user_id().await { id } else {
+            tracing::warn!(
+                session_id = %connection.session_id(),
+                "Presence update from unauthenticated client"
+            );
+            return Ok(Some(CloseCode::NotAuthenticated));
         };
 
         // Validate status

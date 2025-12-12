@@ -30,11 +30,11 @@ impl AttachmentRepository for PgAttachmentRepository {
     #[instrument(skip(self))]
     async fn find_by_id(&self, id: Snowflake) -> RepoResult<Option<Attachment>> {
         let result = sqlx::query_as::<_, AttachmentModel>(
-            r#"
+            r"
             SELECT id, message_id, filename, content_type, size, url, proxy_url, width, height, created_at
             FROM attachments
             WHERE id = $1
-            "#,
+            ",
         )
         .bind(id.into_inner())
         .fetch_optional(&self.pool)
@@ -47,12 +47,12 @@ impl AttachmentRepository for PgAttachmentRepository {
     #[instrument(skip(self))]
     async fn find_by_message(&self, message_id: Snowflake) -> RepoResult<Vec<Attachment>> {
         let results = sqlx::query_as::<_, AttachmentModel>(
-            r#"
+            r"
             SELECT id, message_id, filename, content_type, size, url, proxy_url, width, height, created_at
             FROM attachments
             WHERE message_id = $1
             ORDER BY created_at
-            "#,
+            ",
         )
         .bind(message_id.into_inner())
         .fetch_all(&self.pool)
@@ -65,10 +65,10 @@ impl AttachmentRepository for PgAttachmentRepository {
     #[instrument(skip(self))]
     async fn create(&self, attachment: &Attachment) -> RepoResult<()> {
         sqlx::query(
-            r#"
+            r"
             INSERT INTO attachments (id, message_id, filename, content_type, size, url, proxy_url, width, height)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-            "#,
+            ",
         )
         .bind(attachment.id.into_inner())
         .bind(attachment.message_id.into_inner())
@@ -89,9 +89,9 @@ impl AttachmentRepository for PgAttachmentRepository {
     #[instrument(skip(self))]
     async fn delete_by_message(&self, message_id: Snowflake) -> RepoResult<()> {
         sqlx::query(
-            r#"
+            r"
             DELETE FROM attachments WHERE message_id = $1
-            "#,
+            ",
         )
         .bind(message_id.into_inner())
         .execute(&self.pool)

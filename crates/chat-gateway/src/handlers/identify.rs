@@ -72,7 +72,7 @@ impl IdentifyHandler {
             &session_id,
             user_id,
             client_props,
-            Some(format!("ws://{}/gateway", resume_url)),
+            Some(format!("ws://{resume_url}/gateway")),
         )
         .await
         .map_err(HandlerError::CacheError)?;
@@ -107,7 +107,7 @@ impl IdentifyHandler {
             },
             guilds: guild_ids.iter().map(|id| UnavailableGuild::new(*id)).collect(),
             session_id: session_id.clone(),
-            resume_gateway_url: Some(format!("ws://{}/gateway", resume_url)),
+            resume_gateway_url: Some(format!("ws://{resume_url}/gateway")),
         };
 
         // Send READY event

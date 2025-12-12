@@ -45,7 +45,7 @@ impl Invite {
     pub fn with_expiration(mut self, max_age_seconds: i32) -> Self {
         self.max_age = Some(max_age_seconds);
         if max_age_seconds > 0 {
-            self.expires_at = Some(self.created_at + Duration::seconds(max_age_seconds as i64));
+            self.expires_at = Some(self.created_at + Duration::seconds(i64::from(max_age_seconds)));
         }
         self
     }

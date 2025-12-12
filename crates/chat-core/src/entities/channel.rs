@@ -6,10 +6,11 @@ use serde::{Deserialize, Serialize};
 use crate::value_objects::Snowflake;
 
 /// Channel type enum
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default)]
 #[repr(u8)]
 pub enum ChannelType {
     /// Guild text channel
+    #[default]
     GuildText = 0,
     /// Direct message between users
     Dm = 1,
@@ -20,24 +21,18 @@ pub enum ChannelType {
 impl ChannelType {
     /// Get the numeric value
     #[inline]
+    #[must_use]
     pub fn as_i16(self) -> i16 {
         self as i16
-    }
-}
-
-impl Default for ChannelType {
-    fn default() -> Self {
-        ChannelType::GuildText
     }
 }
 
 impl From<i16> for ChannelType {
     fn from(value: i16) -> Self {
         match value {
-            0 => ChannelType::GuildText,
-            1 => ChannelType::Dm,
-            4 => ChannelType::GuildCategory,
-            _ => ChannelType::GuildText,
+            1 => Self::Dm,
+            4 => Self::GuildCategory,
+            _ => Self::GuildText, // Default for 0 and unknown values
         }
     }
 }
@@ -64,6 +59,7 @@ pub struct Channel {
 
 impl Channel {
     /// Create a new guild text channel
+    #[must_use]
     pub fn new_text(id: Snowflake, guild_id: Snowflake, name: String) -> Self {
         let now = Utc::now();
         Self {
@@ -80,6 +76,7 @@ impl Channel {
     }
 
     /// Create a new DM channel
+    #[must_use]
     pub fn new_dm(id: Snowflake) -> Self {
         let now = Utc::now();
         Self {
@@ -96,6 +93,7 @@ impl Channel {
     }
 
     /// Create a new category channel
+    #[must_use]
     pub fn new_category(id: Snowflake, guild_id: Snowflake, name: String) -> Self {
         let now = Utc::now();
         Self {
@@ -113,29 +111,34 @@ impl Channel {
 
     /// Check if this is a text channel (guild text or DM)
     #[inline]
+    #[must_use]
     pub fn is_text(&self) -> bool {
         matches!(self.channel_type, ChannelType::GuildText | ChannelType::Dm)
     }
 
     /// Check if this is a category
     #[inline]
+    #[must_use]
     pub fn is_category(&self) -> bool {
         matches!(self.channel_type, ChannelType::GuildCategory)
     }
 
     /// Check if this is a DM channel
     #[inline]
+    #[must_use]
     pub fn is_dm(&self) -> bool {
         matches!(self.channel_type, ChannelType::Dm)
     }
 
     /// Check if this is a guild channel
     #[inline]
+    #[must_use]
     pub fn is_guild_channel(&self) -> bool {
         self.guild_id.is_some()
     }
 
     /// Get display name (channel name or fallback for DMs)
+    #[must_use]
     pub fn display_name(&self) -> &str {
         self.name.as_deref().unwrap_or("Direct Message")
     }

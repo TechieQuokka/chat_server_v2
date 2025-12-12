@@ -93,7 +93,7 @@ impl<'a> MemberService<'a> {
             .member_repo()
             .find(guild_id, user_id)
             .await?
-            .ok_or_else(|| ServiceError::not_found("Member", format!("{}/{}", guild_id, user_id)))?;
+            .ok_or_else(|| ServiceError::not_found("Member", format!("{guild_id}/{user_id}")))?;
 
         let user = self
             .ctx
@@ -143,7 +143,7 @@ impl<'a> MemberService<'a> {
             .find(guild_id, target_id)
             .await?
             .ok_or_else(|| {
-                ServiceError::not_found("Member", format!("{}/{}", guild_id, target_id))
+                ServiceError::not_found("Member", format!("{guild_id}/{target_id}"))
             })?;
 
         let user = self
@@ -186,8 +186,7 @@ impl<'a> MemberService<'a> {
                         .await?
                     {
                         return Err(ServiceError::permission_denied(format!(
-                            "Cannot assign role {}",
-                            role_id
+                            "Cannot assign role {role_id}"
                         )));
                     }
                 }
@@ -386,14 +385,13 @@ impl<'a> MemberService<'a> {
         }
 
         // Check hierarchy
-        if self.ctx.member_repo().is_member(guild_id, target_id).await? {
-            if !permission_service
+        if self.ctx.member_repo().is_member(guild_id, target_id).await?
+            && !permission_service
                 .can_manage_member(guild_id, actor_id, target_id)
                 .await?
             {
                 return Err(ServiceError::permission_denied("Cannot ban this member"));
             }
-        }
 
         // Create ban record
         let ban = Ban {
@@ -445,7 +443,7 @@ impl<'a> MemberService<'a> {
 
         // Check if ban exists
         if !self.ctx.ban_repo().is_banned(guild_id, user_id).await? {
-            return Err(ServiceError::not_found("Ban", format!("{}/{}", guild_id, user_id)));
+            return Err(ServiceError::not_found("Ban", format!("{guild_id}/{user_id}")));
         }
 
         self.ctx.ban_repo().delete(guild_id, user_id).await?;
@@ -516,7 +514,7 @@ impl<'a> MemberService<'a> {
                 "avatar": user.avatar
             },
             "nick": member.nickname,
-            "roles": member.role_ids.iter().map(|id| id.to_string()).collect::<Vec<_>>(),
+            "roles": member.role_ids.iter().map(std::string::ToString::to_string).collect::<Vec<_>>(),
             "joined_at": member.joined_at.to_rfc3339()
         });
 

@@ -77,7 +77,7 @@ impl<'a> ChannelService<'a> {
         };
 
         // Get position (default to end of list)
-        let position = request.position.unwrap_or_else(|| {
+        let position = request.position.unwrap_or({
             // Would need to query existing channels to get max position
             0
         });

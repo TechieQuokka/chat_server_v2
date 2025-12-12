@@ -67,8 +67,7 @@ where
             .get("content-length")
             .and_then(|v| v.to_str().ok())
             .and_then(|s| s.parse::<usize>().ok())
-            .map(|len| len > 0)
-            .unwrap_or(false);
+            .is_some_and(|len| len > 0);
 
         if !has_body {
             return Ok(OptionalValidatedJson(None));

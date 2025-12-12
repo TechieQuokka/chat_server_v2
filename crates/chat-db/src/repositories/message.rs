@@ -30,11 +30,11 @@ impl MessageRepository for PgMessageRepository {
     #[instrument(skip(self))]
     async fn find_by_id(&self, id: Snowflake) -> RepoResult<Option<Message>> {
         let result = sqlx::query_as::<_, MessageModel>(
-            r#"
+            r"
             SELECT id, channel_id, author_id, content, created_at, edited_at, deleted_at, reference_id
             FROM messages
             WHERE id = $1 AND deleted_at IS NULL
-            "#,
+            ",
         )
         .bind(id.into_inner())
         .fetch_optional(&self.pool)
@@ -56,13 +56,13 @@ impl MessageRepository for PgMessageRepository {
             (Some(before), None) => {
                 // Fetch messages before cursor (scrolling up)
                 sqlx::query_as::<_, MessageModel>(
-                    r#"
+                    r"
                     SELECT id, channel_id, author_id, content, created_at, edited_at, deleted_at, reference_id
                     FROM messages
                     WHERE channel_id = $1 AND id < $2 AND deleted_at IS NULL
                     ORDER BY id DESC
                     LIMIT $3
-                    "#,
+                    ",
                 )
                 .bind(channel_id.into_inner())
                 .bind(before.into_inner())
@@ -73,13 +73,13 @@ impl MessageRepository for PgMessageRepository {
             (None, Some(after)) => {
                 // Fetch messages after cursor (scrolling down)
                 sqlx::query_as::<_, MessageModel>(
-                    r#"
+                    r"
                     SELECT id, channel_id, author_id, content, created_at, edited_at, deleted_at, reference_id
                     FROM messages
                     WHERE channel_id = $1 AND id > $2 AND deleted_at IS NULL
                     ORDER BY id ASC
                     LIMIT $3
-                    "#,
+                    ",
                 )
                 .bind(channel_id.into_inner())
                 .bind(after.into_inner())
@@ -90,13 +90,13 @@ impl MessageRepository for PgMessageRepository {
             _ => {
                 // Fetch latest messages (no cursor)
                 sqlx::query_as::<_, MessageModel>(
-                    r#"
+                    r"
                     SELECT id, channel_id, author_id, content, created_at, edited_at, deleted_at, reference_id
                     FROM messages
                     WHERE channel_id = $1 AND deleted_at IS NULL
                     ORDER BY id DESC
                     LIMIT $2
-                    "#,
+                    ",
                 )
                 .bind(channel_id.into_inner())
                 .bind(limit)
@@ -112,17 +112,17 @@ impl MessageRepository for PgMessageRepository {
     #[instrument(skip(self))]
     async fn create(&self, message: &Message) -> RepoResult<()> {
         sqlx::query(
-            r#"
+            r"
             INSERT INTO messages (id, channel_id, author_id, content, created_at, reference_id)
             VALUES ($1, $2, $3, $4, $5, $6)
-            "#,
+            ",
         )
         .bind(message.id.into_inner())
         .bind(message.channel_id.into_inner())
         .bind(message.author_id.into_inner())
         .bind(&message.content)
         .bind(message.created_at)
-        .bind(message.reference_id.map(|s| s.into_inner()))
+        .bind(message.reference_id.map(chat_core::Snowflake::into_inner))
         .execute(&self.pool)
         .await
         .map_err(map_db_error)?;
@@ -133,11 +133,11 @@ impl MessageRepository for PgMessageRepository {
     #[instrument(skip(self))]
     async fn update(&self, message: &Message) -> RepoResult<()> {
         let result = sqlx::query(
-            r#"
+            r"
             UPDATE messages
             SET content = $2, edited_at = NOW()
             WHERE id = $1 AND deleted_at IS NULL
-            "#,
+            ",
         )
         .bind(message.id.into_inner())
         .bind(&message.content)
@@ -155,11 +155,11 @@ impl MessageRepository for PgMessageRepository {
     #[instrument(skip(self))]
     async fn delete(&self, id: Snowflake) -> RepoResult<()> {
         let result = sqlx::query(
-            r#"
+            r"
             UPDATE messages
             SET deleted_at = NOW()
             WHERE id = $1 AND deleted_at IS NULL
-            "#,
+            ",
         )
         .bind(id.into_inner())
         .execute(&self.pool)
@@ -182,11 +182,11 @@ impl MessageRepository for PgMessageRepository {
         let ids: Vec<i64> = message_ids.iter().map(|s| s.into_inner()).collect();
 
         let result = sqlx::query(
-            r#"
+            r"
             UPDATE messages
             SET deleted_at = NOW()
             WHERE channel_id = $1 AND id = ANY($2) AND deleted_at IS NULL
-            "#,
+            ",
         )
         .bind(channel_id.into_inner())
         .bind(&ids)
@@ -204,11 +204,11 @@ impl MessageRepository for PgMessageRepository {
         match message {
             Some(msg) => {
                 let attachments = sqlx::query_as::<_, AttachmentModel>(
-                    r#"
+                    r"
                     SELECT id, message_id, filename, content_type, size, url, proxy_url, width, height, created_at
                     FROM attachments
                     WHERE message_id = $1
-                    "#,
+                    ",
                 )
                 .bind(id.into_inner())
                 .fetch_all(&self.pool)

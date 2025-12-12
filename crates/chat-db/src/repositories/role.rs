@@ -31,12 +31,12 @@ impl RoleRepository for PgRoleRepository {
     #[instrument(skip(self))]
     async fn find_by_id(&self, id: Snowflake) -> RepoResult<Option<Role>> {
         let result = sqlx::query_as::<_, RoleModel>(
-            r#"
+            r"
             SELECT id, guild_id, name, color, hoist, position, permissions, mentionable,
                    is_everyone, created_at, updated_at, deleted_at
             FROM roles
             WHERE id = $1 AND deleted_at IS NULL
-            "#,
+            ",
         )
         .bind(id.into_inner())
         .fetch_optional(&self.pool)
@@ -49,13 +49,13 @@ impl RoleRepository for PgRoleRepository {
     #[instrument(skip(self))]
     async fn find_by_guild(&self, guild_id: Snowflake) -> RepoResult<Vec<Role>> {
         let results = sqlx::query_as::<_, RoleModel>(
-            r#"
+            r"
             SELECT id, guild_id, name, color, hoist, position, permissions, mentionable,
                    is_everyone, created_at, updated_at, deleted_at
             FROM roles
             WHERE guild_id = $1 AND deleted_at IS NULL
             ORDER BY position DESC
-            "#,
+            ",
         )
         .bind(guild_id.into_inner())
         .fetch_all(&self.pool)
@@ -68,12 +68,12 @@ impl RoleRepository for PgRoleRepository {
     #[instrument(skip(self))]
     async fn find_everyone(&self, guild_id: Snowflake) -> RepoResult<Option<Role>> {
         let result = sqlx::query_as::<_, RoleModel>(
-            r#"
+            r"
             SELECT id, guild_id, name, color, hoist, position, permissions, mentionable,
                    is_everyone, created_at, updated_at, deleted_at
             FROM roles
             WHERE guild_id = $1 AND is_everyone = TRUE AND deleted_at IS NULL
-            "#,
+            ",
         )
         .bind(guild_id.into_inner())
         .fetch_optional(&self.pool)
@@ -86,11 +86,11 @@ impl RoleRepository for PgRoleRepository {
     #[instrument(skip(self))]
     async fn create(&self, role: &Role) -> RepoResult<()> {
         sqlx::query(
-            r#"
+            r"
             INSERT INTO roles (id, guild_id, name, color, hoist, position, permissions, mentionable,
                               is_everyone, created_at, updated_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-            "#,
+            ",
         )
         .bind(role.id.into_inner())
         .bind(role.guild_id.into_inner())
@@ -113,12 +113,12 @@ impl RoleRepository for PgRoleRepository {
     #[instrument(skip(self))]
     async fn update(&self, role: &Role) -> RepoResult<()> {
         let result = sqlx::query(
-            r#"
+            r"
             UPDATE roles
             SET name = $2, color = $3, hoist = $4, position = $5, permissions = $6,
                 mentionable = $7, updated_at = NOW()
             WHERE id = $1 AND deleted_at IS NULL
-            "#,
+            ",
         )
         .bind(role.id.into_inner())
         .bind(&role.name)
@@ -142,9 +142,9 @@ impl RoleRepository for PgRoleRepository {
     async fn delete(&self, id: Snowflake) -> RepoResult<()> {
         // Check if it's the @everyone role
         let is_everyone = sqlx::query_scalar::<_, bool>(
-            r#"
+            r"
             SELECT is_everyone FROM roles WHERE id = $1 AND deleted_at IS NULL
-            "#,
+            ",
         )
         .bind(id.into_inner())
         .fetch_optional(&self.pool)
@@ -156,11 +156,11 @@ impl RoleRepository for PgRoleRepository {
         }
 
         let result = sqlx::query(
-            r#"
+            r"
             UPDATE roles
             SET deleted_at = NOW()
             WHERE id = $1 AND deleted_at IS NULL
-            "#,
+            ",
         )
         .bind(id.into_inner())
         .execute(&self.pool)
@@ -185,11 +185,11 @@ impl RoleRepository for PgRoleRepository {
 
         for (role_id, position) in positions {
             sqlx::query(
-                r#"
+                r"
                 UPDATE roles
                 SET position = $3, updated_at = NOW()
                 WHERE id = $1 AND guild_id = $2 AND deleted_at IS NULL AND is_everyone = FALSE
-                "#,
+                ",
             )
             .bind(role_id.into_inner())
             .bind(guild_id.into_inner())

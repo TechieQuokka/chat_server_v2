@@ -31,12 +31,12 @@ impl UserRepository for PgUserRepository {
     #[instrument(skip(self))]
     async fn find_by_id(&self, id: Snowflake) -> RepoResult<Option<User>> {
         let result = sqlx::query_as::<_, UserModel>(
-            r#"
+            r"
             SELECT id, username, discriminator, email, password_hash, avatar, bot, system,
                    created_at, updated_at, deleted_at
             FROM users
             WHERE id = $1 AND deleted_at IS NULL
-            "#,
+            ",
         )
         .bind(id.into_inner())
         .fetch_optional(&self.pool)
@@ -49,12 +49,12 @@ impl UserRepository for PgUserRepository {
     #[instrument(skip(self))]
     async fn find_by_email(&self, email: &str) -> RepoResult<Option<User>> {
         let result = sqlx::query_as::<_, UserModel>(
-            r#"
+            r"
             SELECT id, username, discriminator, email, password_hash, avatar, bot, system,
                    created_at, updated_at, deleted_at
             FROM users
             WHERE email = $1 AND deleted_at IS NULL
-            "#,
+            ",
         )
         .bind(email)
         .fetch_optional(&self.pool)
@@ -67,12 +67,12 @@ impl UserRepository for PgUserRepository {
     #[instrument(skip(self))]
     async fn find_by_tag(&self, username: &str, discriminator: &str) -> RepoResult<Option<User>> {
         let result = sqlx::query_as::<_, UserModel>(
-            r#"
+            r"
             SELECT id, username, discriminator, email, password_hash, avatar, bot, system,
                    created_at, updated_at, deleted_at
             FROM users
             WHERE username = $1 AND discriminator = $2 AND deleted_at IS NULL
-            "#,
+            ",
         )
         .bind(username)
         .bind(discriminator)
@@ -86,9 +86,9 @@ impl UserRepository for PgUserRepository {
     #[instrument(skip(self))]
     async fn email_exists(&self, email: &str) -> RepoResult<bool> {
         let result = sqlx::query_scalar::<_, bool>(
-            r#"
+            r"
             SELECT EXISTS(SELECT 1 FROM users WHERE email = $1 AND deleted_at IS NULL)
-            "#,
+            ",
         )
         .bind(email)
         .fetch_one(&self.pool)
@@ -101,10 +101,10 @@ impl UserRepository for PgUserRepository {
     #[instrument(skip(self, password_hash))]
     async fn create(&self, user: &User, password_hash: &str) -> RepoResult<()> {
         sqlx::query(
-            r#"
+            r"
             INSERT INTO users (id, username, discriminator, email, password_hash, avatar, bot, system, created_at, updated_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-            "#,
+            ",
         )
         .bind(user.id.into_inner())
         .bind(&user.username)
@@ -126,11 +126,11 @@ impl UserRepository for PgUserRepository {
     #[instrument(skip(self))]
     async fn update(&self, user: &User) -> RepoResult<()> {
         let result = sqlx::query(
-            r#"
+            r"
             UPDATE users
             SET username = $2, avatar = $3, updated_at = NOW()
             WHERE id = $1 AND deleted_at IS NULL
-            "#,
+            ",
         )
         .bind(user.id.into_inner())
         .bind(&user.username)
@@ -149,11 +149,11 @@ impl UserRepository for PgUserRepository {
     #[instrument(skip(self))]
     async fn delete(&self, id: Snowflake) -> RepoResult<()> {
         let result = sqlx::query(
-            r#"
+            r"
             UPDATE users
             SET deleted_at = NOW()
             WHERE id = $1 AND deleted_at IS NULL
-            "#,
+            ",
         )
         .bind(id.into_inner())
         .execute(&self.pool)
@@ -170,9 +170,9 @@ impl UserRepository for PgUserRepository {
     #[instrument(skip(self))]
     async fn get_password_hash(&self, id: Snowflake) -> RepoResult<Option<String>> {
         let result = sqlx::query_scalar::<_, String>(
-            r#"
+            r"
             SELECT password_hash FROM users WHERE id = $1 AND deleted_at IS NULL
-            "#,
+            ",
         )
         .bind(id.into_inner())
         .fetch_optional(&self.pool)
@@ -185,11 +185,11 @@ impl UserRepository for PgUserRepository {
     #[instrument(skip(self, password_hash))]
     async fn update_password(&self, id: Snowflake, password_hash: &str) -> RepoResult<()> {
         let result = sqlx::query(
-            r#"
+            r"
             UPDATE users
             SET password_hash = $2, updated_at = NOW()
             WHERE id = $1 AND deleted_at IS NULL
-            "#,
+            ",
         )
         .bind(id.into_inner())
         .bind(password_hash)
@@ -208,7 +208,7 @@ impl UserRepository for PgUserRepository {
     async fn next_discriminator(&self, username: &str) -> RepoResult<String> {
         // Find next available discriminator for the username
         let result = sqlx::query_scalar::<_, i32>(
-            r#"
+            r"
             SELECT COALESCE(
                 (
                     SELECT t.discriminator::INT + 1
@@ -227,7 +227,7 @@ impl UserRepository for PgUserRepository {
                 ),
                 1
             )
-            "#,
+            ",
         )
         .bind(username)
         .fetch_one(&self.pool)

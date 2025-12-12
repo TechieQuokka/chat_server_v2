@@ -71,16 +71,13 @@ impl Session {
         last_sequence: u64,
     ) -> Result<Option<(WebSocketSessionData, Vec<SessionEvent>)>, chat_cache::RedisPoolError> {
         // Validate session belongs to user and is resumable
-        let session = match store.validate_for_resume(session_id, user_id).await? {
-            Some(s) => s,
-            None => {
-                tracing::debug!(
-                    session_id = %session_id,
-                    user_id = %user_id,
-                    "Session not found or not resumable"
-                );
-                return Ok(None);
-            }
+        let session = if let Some(s) = store.validate_for_resume(session_id, user_id).await? { s } else {
+            tracing::debug!(
+                session_id = %session_id,
+                user_id = %user_id,
+                "Session not found or not resumable"
+            );
+            return Ok(None);
         };
 
         // Get missed events

@@ -29,9 +29,9 @@ impl PgMemberRepository {
     /// Load role IDs for a member
     async fn load_role_ids(&self, guild_id: i64, user_id: i64) -> Result<Vec<i64>, DomainError> {
         let role_ids = sqlx::query_scalar::<_, i64>(
-            r#"
+            r"
             SELECT role_id FROM member_roles WHERE guild_id = $1 AND user_id = $2
-            "#,
+            ",
         )
         .bind(guild_id)
         .bind(user_id)
@@ -48,11 +48,11 @@ impl MemberRepository for PgMemberRepository {
     #[instrument(skip(self))]
     async fn find(&self, guild_id: Snowflake, user_id: Snowflake) -> RepoResult<Option<GuildMember>> {
         let result = sqlx::query_as::<_, GuildMemberModel>(
-            r#"
+            r"
             SELECT guild_id, user_id, nickname, joined_at, updated_at
             FROM guild_members
             WHERE guild_id = $1 AND user_id = $2
-            "#,
+            ",
         )
         .bind(guild_id.into_inner())
         .bind(user_id.into_inner())
@@ -81,13 +81,13 @@ impl MemberRepository for PgMemberRepository {
         let results = match after {
             Some(after_id) => {
                 sqlx::query_as::<_, GuildMemberModel>(
-                    r#"
+                    r"
                     SELECT guild_id, user_id, nickname, joined_at, updated_at
                     FROM guild_members
                     WHERE guild_id = $1 AND user_id > $2
                     ORDER BY user_id
                     LIMIT $3
-                    "#,
+                    ",
                 )
                 .bind(guild_id.into_inner())
                 .bind(after_id.into_inner())
@@ -97,13 +97,13 @@ impl MemberRepository for PgMemberRepository {
             }
             None => {
                 sqlx::query_as::<_, GuildMemberModel>(
-                    r#"
+                    r"
                     SELECT guild_id, user_id, nickname, joined_at, updated_at
                     FROM guild_members
                     WHERE guild_id = $1
                     ORDER BY user_id
                     LIMIT $2
-                    "#,
+                    ",
                 )
                 .bind(guild_id.into_inner())
                 .bind(limit)
@@ -126,12 +126,12 @@ impl MemberRepository for PgMemberRepository {
     #[instrument(skip(self))]
     async fn find_by_user(&self, user_id: Snowflake) -> RepoResult<Vec<GuildMember>> {
         let results = sqlx::query_as::<_, GuildMemberModel>(
-            r#"
+            r"
             SELECT guild_id, user_id, nickname, joined_at, updated_at
             FROM guild_members
             WHERE user_id = $1
             ORDER BY joined_at DESC
-            "#,
+            ",
         )
         .bind(user_id.into_inner())
         .fetch_all(&self.pool)
@@ -150,9 +150,9 @@ impl MemberRepository for PgMemberRepository {
     #[instrument(skip(self))]
     async fn is_member(&self, guild_id: Snowflake, user_id: Snowflake) -> RepoResult<bool> {
         let result = sqlx::query_scalar::<_, bool>(
-            r#"
+            r"
             SELECT EXISTS(SELECT 1 FROM guild_members WHERE guild_id = $1 AND user_id = $2)
-            "#,
+            ",
         )
         .bind(guild_id.into_inner())
         .bind(user_id.into_inner())
@@ -166,10 +166,10 @@ impl MemberRepository for PgMemberRepository {
     #[instrument(skip(self))]
     async fn create(&self, member: &GuildMember) -> RepoResult<()> {
         sqlx::query(
-            r#"
+            r"
             INSERT INTO guild_members (guild_id, user_id, nickname, joined_at, updated_at)
             VALUES ($1, $2, $3, $4, $5)
-            "#,
+            ",
         )
         .bind(member.guild_id.into_inner())
         .bind(member.user_id.into_inner())
@@ -186,11 +186,11 @@ impl MemberRepository for PgMemberRepository {
     #[instrument(skip(self))]
     async fn update(&self, member: &GuildMember) -> RepoResult<()> {
         let result = sqlx::query(
-            r#"
+            r"
             UPDATE guild_members
             SET nickname = $3, updated_at = NOW()
             WHERE guild_id = $1 AND user_id = $2
-            "#,
+            ",
         )
         .bind(member.guild_id.into_inner())
         .bind(member.user_id.into_inner())
@@ -209,9 +209,9 @@ impl MemberRepository for PgMemberRepository {
     #[instrument(skip(self))]
     async fn delete(&self, guild_id: Snowflake, user_id: Snowflake) -> RepoResult<()> {
         let result = sqlx::query(
-            r#"
+            r"
             DELETE FROM guild_members WHERE guild_id = $1 AND user_id = $2
-            "#,
+            ",
         )
         .bind(guild_id.into_inner())
         .bind(user_id.into_inner())
@@ -234,11 +234,11 @@ impl MemberRepository for PgMemberRepository {
         role_id: Snowflake,
     ) -> RepoResult<()> {
         sqlx::query(
-            r#"
+            r"
             INSERT INTO member_roles (guild_id, user_id, role_id)
             VALUES ($1, $2, $3)
             ON CONFLICT (guild_id, user_id, role_id) DO NOTHING
-            "#,
+            ",
         )
         .bind(guild_id.into_inner())
         .bind(user_id.into_inner())
@@ -258,9 +258,9 @@ impl MemberRepository for PgMemberRepository {
         role_id: Snowflake,
     ) -> RepoResult<()> {
         sqlx::query(
-            r#"
+            r"
             DELETE FROM member_roles WHERE guild_id = $1 AND user_id = $2 AND role_id = $3
-            "#,
+            ",
         )
         .bind(guild_id.into_inner())
         .bind(user_id.into_inner())

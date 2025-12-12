@@ -25,8 +25,8 @@ impl RegisterRequest {
     pub fn unique() -> Self {
         let suffix = unique_suffix();
         Self {
-            username: format!("testuser{}", suffix),
-            email: format!("test{}@example.com", suffix),
+            username: format!("testuser{suffix}"),
+            email: format!("test{suffix}@example.com"),
             password: "TestPass123!".to_string(),
         }
     }
@@ -80,7 +80,7 @@ impl CreateGuildRequest {
     pub fn unique() -> Self {
         let suffix = unique_suffix();
         Self {
-            name: format!("Test Guild {}", suffix),
+            name: format!("Test Guild {suffix}"),
             icon: None,
             description: Some("A test guild".to_string()),
         }
@@ -112,7 +112,7 @@ impl CreateChannelRequest {
     pub fn text_channel() -> Self {
         let suffix = unique_suffix();
         Self {
-            name: format!("test-channel-{}", suffix),
+            name: format!("test-channel-{suffix}"),
             channel_type: 0, // GuildText
             topic: Some("Test topic".to_string()),
             parent_id: None,
@@ -122,7 +122,7 @@ impl CreateChannelRequest {
     pub fn category() -> Self {
         let suffix = unique_suffix();
         Self {
-            name: format!("Test Category {}", suffix),
+            name: format!("Test Category {suffix}"),
             channel_type: 4, // GuildCategory
             topic: None,
             parent_id: None,
@@ -200,8 +200,8 @@ impl CreateRoleRequest {
     pub fn unique() -> Self {
         let suffix = unique_suffix();
         Self {
-            name: format!("Test Role {}", suffix),
-            color: Some(0x3498db),
+            name: format!("Test Role {suffix}"),
+            color: Some(0x0034_98db),
             hoist: Some(true),
             mentionable: Some(true),
             permissions: None,

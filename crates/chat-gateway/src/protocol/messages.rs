@@ -135,7 +135,7 @@ impl GatewayMessage {
         if self.op != OpCode::Heartbeat {
             return None;
         }
-        Some(self.d.as_ref().and_then(|d| d.as_u64()))
+        Some(self.d.as_ref().and_then(serde_json::Value::as_u64))
     }
 
     // === Utilities ===

@@ -56,12 +56,12 @@ impl<'a> ChannelInsert<'a> {
     pub fn new(channel: &'a Channel) -> Self {
         Self {
             id: channel.id.into_inner(),
-            guild_id: channel.guild_id.map(|s| s.into_inner()),
+            guild_id: channel.guild_id.map(chat_core::Snowflake::into_inner),
             name: channel.name.as_deref(),
             channel_type: channel_type_to_str(channel.channel_type),
             topic: channel.topic.as_deref(),
             position: channel.position,
-            parent_id: channel.parent_id.map(|s| s.into_inner()),
+            parent_id: channel.parent_id.map(chat_core::Snowflake::into_inner),
         }
     }
 }
@@ -82,7 +82,7 @@ impl<'a> ChannelUpdate<'a> {
             name: channel.name.as_deref(),
             topic: channel.topic.as_deref(),
             position: channel.position,
-            parent_id: channel.parent_id.map(|s| s.into_inner()),
+            parent_id: channel.parent_id.map(chat_core::Snowflake::into_inner),
         }
     }
 }

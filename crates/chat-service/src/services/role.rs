@@ -138,11 +138,10 @@ impl<'a> RoleService<'a> {
         }
 
         // Cannot edit @everyone role's position or delete it
-        if role.is_everyone {
-            if request.position.is_some() {
+        if role.is_everyone
+            && request.position.is_some() {
                 return Err(ServiceError::validation("Cannot change @everyone role position"));
             }
-        }
 
         // Check hierarchy - can only edit roles below own highest role
         let actor_highest = self.get_actor_highest_position(guild_id, user_id).await?;

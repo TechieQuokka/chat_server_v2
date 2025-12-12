@@ -34,15 +34,15 @@ pub enum ServiceError {
 impl fmt::Display for ServiceError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Domain(e) => write!(f, "{}", e),
-            Self::App(e) => write!(f, "{}", e),
-            Self::NotFound { resource, id } => write!(f, "{} not found: {}", resource, id),
+            Self::Domain(e) => write!(f, "{e}"),
+            Self::App(e) => write!(f, "{e}"),
+            Self::NotFound { resource, id } => write!(f, "{resource} not found: {id}"),
             Self::PermissionDenied { permission } => {
-                write!(f, "Missing required permission: {}", permission)
+                write!(f, "Missing required permission: {permission}")
             }
-            Self::Validation(msg) => write!(f, "Validation error: {}", msg),
-            Self::Conflict(msg) => write!(f, "Conflict: {}", msg),
-            Self::Internal(msg) => write!(f, "Internal error: {}", msg),
+            Self::Validation(msg) => write!(f, "Validation error: {msg}"),
+            Self::Conflict(msg) => write!(f, "Conflict: {msg}"),
+            Self::Internal(msg) => write!(f, "Internal error: {msg}"),
         }
     }
 }
@@ -145,7 +145,7 @@ impl From<ServiceError> for AppError {
             ServiceError::Domain(e) => AppError::Domain(e),
             ServiceError::App(e) => e,
             ServiceError::NotFound { resource, id } => {
-                AppError::NotFound(format!("{} {}", resource, id))
+                AppError::NotFound(format!("{resource} {id}"))
             }
             ServiceError::PermissionDenied { permission: _ } => {
                 AppError::InsufficientPermissions

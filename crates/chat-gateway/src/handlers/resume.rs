@@ -43,16 +43,13 @@ impl ResumeHandler {
             }
         };
 
-        let user_id = match claims.user_id() {
-            Ok(id) => id,
-            Err(_) => {
-                // Invalid token claims
-                connection
-                    .send(GatewayMessage::invalid_session(false))
-                    .await
-                    .ok();
-                return Ok(None);
-            }
+        let user_id = if let Ok(id) = claims.user_id() { id } else {
+            // Invalid token claims
+            connection
+                .send(GatewayMessage::invalid_session(false))
+                .await
+                .ok();
+            return Ok(None);
         };
 
         // Attempt to resume the session

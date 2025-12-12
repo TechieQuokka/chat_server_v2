@@ -44,7 +44,7 @@ impl<'a> PresenceService<'a> {
             .presence_store()
             .update_status(user_id, status)
             .await
-            .map_err(|e| ServiceError::internal(format!("Failed to update presence: {}", e)))?;
+            .map_err(|e| ServiceError::internal(format!("Failed to update presence: {e}")))?;
 
         info!(user_id = %user_id, status = %status, "Presence updated");
 
@@ -91,7 +91,7 @@ impl<'a> PresenceService<'a> {
             .presence_store()
             .get_presence(user_id)
             .await
-            .map_err(|e| ServiceError::internal(format!("Failed to get presence: {}", e)))?;
+            .map_err(|e| ServiceError::internal(format!("Failed to get presence: {e}")))?;
 
         let (status, custom_status, last_seen) = if let Some(data) = presence_data {
             (
@@ -125,7 +125,7 @@ impl<'a> PresenceService<'a> {
                 .presence_store()
                 .get_presence(user_id)
                 .await
-                .map_err(|e| ServiceError::internal(format!("Failed to get presence: {}", e)))?;
+                .map_err(|e| ServiceError::internal(format!("Failed to get presence: {e}")))?;
 
             let (status, custom_status, last_seen) = if let Some(data) = presence_data {
                 (
@@ -176,7 +176,7 @@ impl<'a> PresenceService<'a> {
                 .presence_store()
                 .get_presence(member.user_id)
                 .await
-                .map_err(|e| ServiceError::internal(format!("Failed to get presence: {}", e)))?;
+                .map_err(|e| ServiceError::internal(format!("Failed to get presence: {e}")))?;
 
             let (status, custom_status, last_seen) = if let Some(data) = presence_data {
                 (
@@ -213,7 +213,7 @@ impl<'a> PresenceService<'a> {
             .presence_store()
             .remove_presence(user_id)
             .await
-            .map_err(|e| ServiceError::internal(format!("Failed to remove presence: {}", e)))?;
+            .map_err(|e| ServiceError::internal(format!("Failed to remove presence: {e}")))?;
 
         info!(user_id = %user_id, "User went offline");
 
@@ -256,9 +256,9 @@ impl<'a> PresenceService<'a> {
             .presence_store()
             .get_presence(user_id)
             .await
-            .map_err(|e| ServiceError::internal(format!("Failed to get presence: {}", e)))?;
+            .map_err(|e| ServiceError::internal(format!("Failed to get presence: {e}")))?;
 
-        Ok(presence_data.map(|d| d.status != UserStatus::Offline).unwrap_or(false))
+        Ok(presence_data.is_some_and(|d| d.status != UserStatus::Offline))
     }
 
     /// Get online member count for a guild
@@ -269,7 +269,7 @@ impl<'a> PresenceService<'a> {
             .presence_store()
             .get_guild_online_count(guild_id)
             .await
-            .map_err(|e| ServiceError::internal(format!("Failed to get online count: {}", e)))?;
+            .map_err(|e| ServiceError::internal(format!("Failed to get online count: {e}")))?;
 
         Ok(count as i64)
     }

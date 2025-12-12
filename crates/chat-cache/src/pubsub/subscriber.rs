@@ -171,25 +171,22 @@ impl Subscriber {
             tokio::select! {
                 // Handle incoming messages
                 msg = stream.next() => {
-                    match msg {
-                        Some(msg) => {
-                            let channel_name: String = msg.get_channel_name().to_string();
-                            let payload: String = msg.get_payload().unwrap_or_default();
+                    if let Some(msg) = msg {
+                        let channel_name: String = msg.get_channel_name().to_string();
+                        let payload: String = msg.get_payload().unwrap_or_default();
 
-                            let received = ReceivedMessage::from_redis(channel_name.clone(), payload);
+                        let received = ReceivedMessage::from_redis(channel_name.clone(), payload);
 
-                            // Broadcast to all receivers (ignore send errors - no receivers)
-                            let _ = broadcast_tx.send(received);
+                        // Broadcast to all receivers (ignore send errors - no receivers)
+                        let _ = broadcast_tx.send(received);
 
-                            tracing::trace!(
-                                channel = %channel_name,
-                                "Received Pub/Sub message"
-                            );
-                        }
-                        None => {
-                            tracing::warn!("Pub/Sub stream ended");
-                            return Ok(false);
-                        }
+                        tracing::trace!(
+                            channel = %channel_name,
+                            "Received Pub/Sub message"
+                        );
+                    } else {
+                        tracing::warn!("Pub/Sub stream ended");
+                        return Ok(false);
                     }
                 }
 

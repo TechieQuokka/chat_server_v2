@@ -39,9 +39,9 @@ impl BanRepository for PgBanRepository {
     #[instrument(skip(self))]
     async fn is_banned(&self, guild_id: Snowflake, user_id: Snowflake) -> RepoResult<bool> {
         let result = sqlx::query_scalar::<_, bool>(
-            r#"
+            r"
             SELECT EXISTS(SELECT 1 FROM bans WHERE guild_id = $1 AND user_id = $2)
-            "#,
+            ",
         )
         .bind(guild_id.into_inner())
         .bind(user_id.into_inner())
@@ -55,11 +55,11 @@ impl BanRepository for PgBanRepository {
     #[instrument(skip(self))]
     async fn find(&self, guild_id: Snowflake, user_id: Snowflake) -> RepoResult<Option<Ban>> {
         let result = sqlx::query_as::<_, BanModel>(
-            r#"
+            r"
             SELECT guild_id, user_id, reason, banned_by, created_at
             FROM bans
             WHERE guild_id = $1 AND user_id = $2
-            "#,
+            ",
         )
         .bind(guild_id.into_inner())
         .bind(user_id.into_inner())
@@ -73,12 +73,12 @@ impl BanRepository for PgBanRepository {
     #[instrument(skip(self))]
     async fn find_by_guild(&self, guild_id: Snowflake) -> RepoResult<Vec<Ban>> {
         let results = sqlx::query_as::<_, BanModel>(
-            r#"
+            r"
             SELECT guild_id, user_id, reason, banned_by, created_at
             FROM bans
             WHERE guild_id = $1
             ORDER BY created_at DESC
-            "#,
+            ",
         )
         .bind(guild_id.into_inner())
         .fetch_all(&self.pool)
@@ -93,11 +93,11 @@ impl BanRepository for PgBanRepository {
         // Note: banned_by is not in the Ban struct from traits, so we use the user_id
         // In practice, the service layer should pass the moderator ID
         sqlx::query(
-            r#"
+            r"
             INSERT INTO bans (guild_id, user_id, reason, banned_by)
             VALUES ($1, $2, $3, $4)
             ON CONFLICT (guild_id, user_id) DO UPDATE SET reason = $3
-            "#,
+            ",
         )
         .bind(ban.guild_id.into_inner())
         .bind(ban.user_id.into_inner())
@@ -113,9 +113,9 @@ impl BanRepository for PgBanRepository {
     #[instrument(skip(self))]
     async fn delete(&self, guild_id: Snowflake, user_id: Snowflake) -> RepoResult<()> {
         let result = sqlx::query(
-            r#"
+            r"
             DELETE FROM bans WHERE guild_id = $1 AND user_id = $2
-            "#,
+            ",
         )
         .bind(guild_id.into_inner())
         .bind(user_id.into_inner())
@@ -143,11 +143,11 @@ impl PgBanRepository {
         reason: Option<&str>,
     ) -> RepoResult<()> {
         sqlx::query(
-            r#"
+            r"
             INSERT INTO bans (guild_id, user_id, reason, banned_by)
             VALUES ($1, $2, $3, $4)
             ON CONFLICT (guild_id, user_id) DO UPDATE SET reason = $3, banned_by = $4
-            "#,
+            ",
         )
         .bind(guild_id.into_inner())
         .bind(user_id.into_inner())

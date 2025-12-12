@@ -264,7 +264,7 @@ impl<'a> GuildService<'a> {
 
         // Check if user is a member
         if !self.ctx.member_repo().is_member(guild_id, user_id).await? {
-            return Err(ServiceError::not_found("Member", format!("{}/{}", guild_id, user_id)));
+            return Err(ServiceError::not_found("Member", format!("{guild_id}/{user_id}")));
         }
 
         // Remove member

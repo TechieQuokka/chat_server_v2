@@ -391,13 +391,9 @@ impl<'a> MessageService<'a> {
         let mut responses = Vec::with_capacity(messages.len());
 
         for message in messages {
-            let author = self
-                .ctx
-                .user_repo()
-                .find_by_id(message.author_id)
-                .await?
-                .map(|u| crate::dto::UserResponse::from(&u))
-                .unwrap_or_else(|| UserResponse {
+            let author = match self.ctx.user_repo().find_by_id(message.author_id).await? {
+                Some(u) => crate::dto::UserResponse::from(&u),
+                None => UserResponse {
                     id: message.author_id.to_string(),
                     username: "[Deleted User]".to_string(),
                     discriminator: "0000".to_string(),
@@ -405,7 +401,8 @@ impl<'a> MessageService<'a> {
                     bot: false,
                     system: false,
                     created_at: message.created_at,
-                });
+                },
+            };
 
             // Get attachments
             let attachments = self

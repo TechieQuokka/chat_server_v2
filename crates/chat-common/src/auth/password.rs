@@ -20,7 +20,7 @@ pub fn hash_password(password: &str) -> Result<String, AppError> {
     argon2
         .hash_password(password.as_bytes(), &salt)
         .map(|hash| hash.to_string())
-        .map_err(|e| AppError::Internal(anyhow::anyhow!("Password hashing failed: {}", e)))
+        .map_err(|e| AppError::Internal(anyhow::anyhow!("Password hashing failed: {e}")))
 }
 
 /// Verify a password against a hash
@@ -29,7 +29,7 @@ pub fn hash_password(password: &str) -> Result<String, AppError> {
 /// Returns an error if verification fails or the hash is invalid
 pub fn verify_password(password: &str, hash: &str) -> Result<bool, AppError> {
     let parsed_hash = PasswordHash::new(hash)
-        .map_err(|e| AppError::Internal(anyhow::anyhow!("Invalid password hash format: {}", e)))?;
+        .map_err(|e| AppError::Internal(anyhow::anyhow!("Invalid password hash format: {e}")))?;
 
     Ok(Argon2::default()
         .verify_password(password.as_bytes(), &parsed_hash)
@@ -93,13 +93,13 @@ pub fn validate_password_strength(password: &str) -> Result<(), AppError> {
         ));
     }
 
-    if !password.chars().any(|c| c.is_uppercase()) {
+    if !password.chars().any(char::is_uppercase) {
         return Err(AppError::Validation(
             "Password must contain at least one uppercase letter".to_string(),
         ));
     }
 
-    if !password.chars().any(|c| c.is_lowercase()) {
+    if !password.chars().any(char::is_lowercase) {
         return Err(AppError::Validation(
             "Password must contain at least one lowercase letter".to_string(),
         ));

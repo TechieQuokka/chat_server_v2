@@ -1,5 +1,8 @@
 # Docker Compose configuration for chat server development
 # Usage: docker compose up -d
+#
+# NOTE: PostgreSQL is exposed on port 5433 (not 5432) to avoid conflicts
+# with native PostgreSQL installations on the host machine.
 
 services:
   # ==========================================================================
@@ -14,7 +17,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-2147483647}
       POSTGRES_DB: chat_db
     ports:
-      - "5432:5432"
+      - "5433:5432"  # Host:Container - use 5433 to avoid conflict with native PostgreSQL
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docs/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro

@@ -54,7 +54,7 @@ async fn handle_socket(state: GatewayState, socket: axum::extract::ws::WebSocket
     // Send Hello message immediately
     let hello = GatewayMessage::hello(HelloPayload::with_interval(HEARTBEAT_INTERVAL_MS));
     if let Ok(json) = hello.to_json() {
-        if ws_sink.send(Message::Text(json.into())).await.is_err() {
+        if ws_sink.send(Message::Text(json)).await.is_err() {
             tracing::warn!(session_id = %session_id, "Failed to send Hello message");
             cleanup_connection(&state, &session_id, &connection).await;
             return;
@@ -120,7 +120,7 @@ async fn handle_socket(state: GatewayState, socket: axum::extract::ws::WebSocket
     let send_task = tokio::spawn(async move {
         while let Some(msg) = rx.recv().await {
             if let Ok(json) = msg.to_json() {
-                if ws_sink.send(Message::Text(json.into())).await.is_err() {
+                if ws_sink.send(Message::Text(json)).await.is_err() {
                     tracing::warn!(
                         session_id = %session_id_send,
                         "Failed to send message to WebSocket"

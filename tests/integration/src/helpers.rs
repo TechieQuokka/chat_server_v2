@@ -89,7 +89,7 @@ impl TestServer {
         Ok(self
             .client
             .get(&url)
-            .header("Authorization", format!("Bearer {}", token))
+            .header("Authorization", format!("Bearer {token}"))
             .send()
             .await?)
     }
@@ -111,7 +111,7 @@ impl TestServer {
         Ok(self
             .client
             .post(&url)
-            .header("Authorization", format!("Bearer {}", token))
+            .header("Authorization", format!("Bearer {token}"))
             .json(body)
             .send()
             .await?)
@@ -128,7 +128,7 @@ impl TestServer {
         Ok(self
             .client
             .patch(&url)
-            .header("Authorization", format!("Bearer {}", token))
+            .header("Authorization", format!("Bearer {token}"))
             .json(body)
             .send()
             .await?)
@@ -140,7 +140,7 @@ impl TestServer {
         Ok(self
             .client
             .delete(&url)
-            .header("Authorization", format!("Bearer {}", token))
+            .header("Authorization", format!("Bearer {token}"))
             .send()
             .await?)
     }
@@ -156,7 +156,7 @@ impl TestServer {
         Ok(self
             .client
             .put(&url)
-            .header("Authorization", format!("Bearer {}", token))
+            .header("Authorization", format!("Bearer {token}"))
             .json(body)
             .send()
             .await?)
@@ -168,7 +168,7 @@ pub fn test_config() -> Result<AppConfig> {
     // Load from environment or use defaults
     dotenvy::dotenv().ok();
 
-    let config = AppConfig::from_env().map_err(|e| anyhow::anyhow!("Config error: {}", e))?;
+    let config = AppConfig::from_env().map_err(|e| anyhow::anyhow!("Config error: {e}"))?;
 
     Ok(config)
 }
@@ -194,10 +194,7 @@ pub async fn assert_json<T: DeserializeOwned>(response: Response, expected_statu
     if status != expected_status {
         let body = response.text().await?;
         anyhow::bail!(
-            "Expected status {}, got {}. Body: {}",
-            expected_status,
-            status,
-            body
+            "Expected status {expected_status}, got {status}. Body: {body}"
         );
     }
     Ok(response.json().await?)
@@ -209,10 +206,7 @@ pub async fn assert_status(response: Response, expected_status: StatusCode) -> R
     if status != expected_status {
         let body = response.text().await?;
         anyhow::bail!(
-            "Expected status {}, got {}. Body: {}",
-            expected_status,
-            status,
-            body
+            "Expected status {expected_status}, got {status}. Body: {body}"
         );
     }
     Ok(())

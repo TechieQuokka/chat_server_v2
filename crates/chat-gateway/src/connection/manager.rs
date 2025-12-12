@@ -249,7 +249,7 @@ impl ConnectionManager {
     pub async fn broadcast(&self, message: GatewayMessage) -> usize {
         let mut sent = 0;
 
-        for entry in self.connections.iter() {
+        for entry in &self.connections {
             if entry.send(message.clone()).await.is_ok() {
                 sent += 1;
             }

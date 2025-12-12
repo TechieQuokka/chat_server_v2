@@ -62,7 +62,7 @@ pub async fn create_invite(
         .map_err(|_| ApiError::invalid_path("Invalid channel_id format"))?;
 
     // Use default values if no body provided
-    let request = body.map(|j| j.0).unwrap_or_else(CreateInviteRequest::new);
+    let request = body.map(|j| j.0).unwrap_or_default();
 
     let service = InviteService::new(state.service_context());
     let response = service

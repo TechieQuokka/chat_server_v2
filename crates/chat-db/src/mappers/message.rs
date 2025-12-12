@@ -53,7 +53,7 @@ impl<'a> MessageInsert<'a> {
             channel_id: message.channel_id.into_inner(),
             author_id: message.author_id.into_inner(),
             content: &message.content,
-            reference_id: message.reference_id.map(|s| s.into_inner()),
+            reference_id: message.reference_id.map(chat_core::Snowflake::into_inner),
         }
     }
 }

@@ -82,7 +82,7 @@ impl RedisPool {
             .map_err(|e| RedisPoolError::CreatePool(e.to_string()))?;
 
         // Redact credentials from URL for logging
-        let safe_url = config.url.split('@').last().unwrap_or(&config.url);
+        let safe_url = config.url.split('@').next_back().unwrap_or(&config.url);
         tracing::info!(
             url = %safe_url,
             max_connections = config.max_connections,

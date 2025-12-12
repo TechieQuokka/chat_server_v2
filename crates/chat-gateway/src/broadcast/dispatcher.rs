@@ -182,15 +182,12 @@ impl EventDispatcher {
     /// Handle a received message from Redis
     async fn handle_message(&self, msg: ReceivedMessage) {
         // Parse the event
-        let event = match &msg.event {
-            Some(e) => e,
-            None => {
-                tracing::debug!(
-                    channel = ?msg.channel,
-                    "Received non-event message, ignoring"
-                );
-                return;
-            }
+        let event = if let Some(e) = &msg.event { e } else {
+            tracing::debug!(
+                channel = ?msg.channel,
+                "Received non-event message, ignoring"
+            );
+            return;
         };
 
         let event_type = &event.event_type;

@@ -117,7 +117,7 @@ impl<'a> PermissionService<'a> {
             .member_repo()
             .find(guild_id, user_id)
             .await?
-            .ok_or_else(|| ServiceError::not_found("Member", format!("{}/{}", guild_id, user_id)))?;
+            .ok_or_else(|| ServiceError::not_found("Member", format!("{guild_id}/{user_id}")))?;
 
         // Get all roles for the member
         let mut permissions = Permissions::empty();
@@ -284,7 +284,7 @@ impl<'a> PermissionService<'a> {
             .member_repo()
             .find(guild_id, user_id)
             .await?
-            .ok_or_else(|| ServiceError::not_found("Member", format!("{}/{}", guild_id, user_id)))?;
+            .ok_or_else(|| ServiceError::not_found("Member", format!("{guild_id}/{user_id}")))?;
 
         let mut highest_position = 0;
 

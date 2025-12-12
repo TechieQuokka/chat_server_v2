@@ -5,7 +5,9 @@
       "mcp__postgres__query",
       "Bash(cargo check:*)",
       "mcp__filesystem__directory_tree",
-      "mcp__filesystem__list_directory"
+      "mcp__filesystem__list_directory",
+      "Bash(docker exec:*)",
+      "Bash(cargo clippy:*)"
     ]
   }
 }

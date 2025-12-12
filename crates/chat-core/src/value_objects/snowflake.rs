@@ -16,7 +16,7 @@ pub struct Snowflake(i64);
 
 impl Snowflake {
     /// Custom epoch: 2024-01-01 00:00:00 UTC (milliseconds)
-    pub const EPOCH: i64 = 1704067200000;
+    pub const EPOCH: i64 = 1_704_067_200_000;
 
     /// Create a new Snowflake from a raw i64 value
     #[inline]
@@ -123,7 +123,7 @@ impl<'de> Deserialize<'de> for Snowflake {
 
         struct SnowflakeVisitor;
 
-        impl<'de> Visitor<'de> for SnowflakeVisitor {
+        impl Visitor<'_> for SnowflakeVisitor {
             type Value = Snowflake;
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
@@ -214,22 +214,18 @@ impl SnowflakeGenerator {
             };
 
             // Try to update last_timestamp atomically
-            match self.last_timestamp.compare_exchange(
+            if self.last_timestamp.compare_exchange(
                 last,
                 timestamp,
                 Ordering::Release,
                 Ordering::Relaxed,
-            ) {
-                Ok(_) => {
-                    let id = ((timestamp - Snowflake::EPOCH) << 22)
-                        | ((self.worker_id as i64) << 12)
-                        | sequence;
-                    return Snowflake::new(id);
-                }
-                Err(_) => {
-                    // Another thread updated timestamp, retry
-                    continue;
-                }
+            ).is_ok() {
+                let id = ((timestamp - Snowflake::EPOCH) << 22)
+                    | (i64::from(self.worker_id) << 12)
+                    | sequence;
+                return Snowflake::new(id);
+            } else {
+                // Another thread updated timestamp, retry loop
             }
         }
     }
