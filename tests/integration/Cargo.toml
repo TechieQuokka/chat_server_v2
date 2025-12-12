@@ -1,0 +1,46 @@
+[package]
+name = "integration-tests"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+rust-version.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+# Internal crates
+chat-core = { workspace = true }
+chat-common = { workspace = true }
+chat-service = { workspace = true }
+chat-db = { workspace = true }
+chat-cache = { workspace = true }
+chat-api = { workspace = true }
+chat-gateway = { workspace = true }
+
+# Async runtime
+tokio = { workspace = true }
+
+# Web framework
+axum = { workspace = true }
+
+# HTTP client
+reqwest = { workspace = true }
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Error handling
+anyhow = { workspace = true }
+
+# Time
+chrono = { workspace = true }
+
+# UUID
+uuid = { workspace = true }
+
+# Configuration
+dotenvy = { workspace = true }

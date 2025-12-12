@@ -8,6 +8,7 @@ members = [
     "crates/chat-service",
     "crates/chat-api",
     "crates/chat-gateway",
+    "tests/integration",
 ]
 
 [workspace.package]
@@ -24,6 +25,8 @@ chat-common = { path = "crates/chat-common" }
 chat-db = { path = "crates/chat-db" }
 chat-cache = { path = "crates/chat-cache" }
 chat-service = { path = "crates/chat-service" }
+chat-api = { path = "crates/chat-api" }
+chat-gateway = { path = "crates/chat-gateway" }
 
 # Async runtime
 tokio = { version = "1.40", features = ["full"] }
@@ -86,6 +89,10 @@ base64 = "0.22"
 # OpenAPI
 utoipa = { version = "5", features = ["axum_extras", "chrono"] }
 utoipa-swagger-ui = { version = "8", features = ["axum"] }
+
+# Testing
+reqwest = { version = "0.12", features = ["json"] }
+tokio-tungstenite-wasm = "0.4"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

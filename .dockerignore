@@ -1,0 +1,53 @@
+# Build artifacts
+target/
+debug/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+*.md
+LICENSE
+docs/
+
+# Environment files (should be provided at runtime)
+.env
+.env.*
+!.env.example
+
+# Test files
+*.test
+coverage/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Rust specific
+**/*.rs.bk
+*.pdb
+
+# Log files
+*.log
+logs/
+
+# Uploads (runtime data)
+uploads/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
