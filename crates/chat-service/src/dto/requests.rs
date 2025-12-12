@@ -257,7 +257,7 @@ pub struct AddMemberRoleRequest {
 // ============================================================================
 
 /// Create invite request
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Default)]
 pub struct CreateInviteRequest {
     /// Max age in seconds (0 = never expires, default = 86400)
     #[serde(default = "default_invite_max_age")]
@@ -270,6 +270,17 @@ pub struct CreateInviteRequest {
     /// Whether membership is temporary
     #[serde(default)]
     pub temporary: bool,
+}
+
+impl CreateInviteRequest {
+    /// Create a new CreateInviteRequest with default values
+    pub fn new() -> Self {
+        Self {
+            max_age: default_invite_max_age(),
+            max_uses: 0,
+            temporary: false,
+        }
+    }
 }
 
 fn default_invite_max_age() -> i32 {

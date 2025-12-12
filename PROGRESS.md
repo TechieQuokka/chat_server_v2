@@ -263,15 +263,142 @@ Progress: 4/4 COMPLETE
 
 Progress: 35/35 COMPLETE
 
-## Phase 7: chat-api (REST API)
-- [ ] Axum server + middleware stack
-- [ ] Extractors: AuthUser, Pagination, ValidatedJson
-- [ ] All routes per api.yaml
-- [ ] Error response formatting
-- [ ] Health endpoints
-- [ ] OpenAPI (utoipa)
+## Phase 7: chat-api (REST API) ✅
 
-Progress: 0/6
+### State & Configuration
+- [x] AppState: Wraps ServiceContext for Axum handlers
+  - FromRef implementations for handler extraction
+  - Clone implementation via Arc<ServiceContext>
+  - config() accessor for application settings
+
+### Error Response Formatting
+- [x] ApiError enum with comprehensive error types
+  - From<AppError>, From<ServiceError>, From<DomainError>
+  - From<ValidationErrors> for request validation
+  - InvalidPath, InvalidQuery, MissingAuth, InvalidAuthFormat variants
+  - IntoResponse impl with JSON error body
+- [x] ErrorBody and ErrorDetail structs for consistent JSON responses
+- [x] Created<T> wrapper for 201 responses
+- [x] NoContent for 204 responses
+- [x] ApiResult<T> type alias
+
+### Extractors
+- [x] AuthUser: JWT Bearer token extraction
+  - Extracts user_id from validated access token
+  - Uses JwtService from state via FromRef
+  - Returns ApiError::MissingAuth or ApiError::InvalidAuthFormat
+- [x] OptionalAuthUser: Optional authentication for public endpoints
+- [x] Pagination: Cursor-based pagination with limit/after/before
+  - Default limit: 50, Max: 100
+  - Snowflake ID parsing for cursors
+- [x] ValidatedJson<T>: JSON extraction with validation
+  - Uses validator crate, FromRequest impl
+  - Returns ApiError with validation details
+- [x] OptionalValidatedJson<T>: Optional validated JSON body
+
+### Middleware Stack
+- [x] Request ID generation (x-request-id header)
+  - SetRequestIdLayer + PropagateRequestIdLayer
+- [x] Tracing with request spans
+  - Method, URI, request_id in span context
+  - INFO level logging for requests/responses
+- [x] Timeout (30 seconds, returns 503)
+- [x] CORS configuration
+  - Permissive for development (Any origin)
+  - All standard methods (GET, POST, PUT, PATCH, DELETE, OPTIONS)
+  - Authorization, Content-Type, Accept, x-request-id headers
+
+### Health Endpoints
+- [x] GET /health: Basic health check
+- [x] GET /health/ready: Readiness check (DB + Redis)
+  - Returns unhealthy status if checks fail
+
+### Auth Handlers (/auth)
+- [x] POST /auth/register: User registration
+- [x] POST /auth/login: User login
+- [x] POST /auth/logout: User logout (requires auth)
+- [x] POST /auth/refresh: Token refresh
+
+### User Handlers (/users)
+- [x] GET /users/@me: Get current user
+- [x] PATCH /users/@me: Update current user
+- [x] GET /users/{user_id}: Get user by ID (public profile)
+- [x] GET /users/@me/guilds: Get current user's guilds
+- [x] GET /users/@me/channels: Get current user's DM channels
+- [x] POST /users/@me/channels: Create DM channel
+
+### Guild Handlers (/guilds)
+- [x] POST /guilds: Create guild
+- [x] GET /guilds/{guild_id}: Get guild
+- [x] PATCH /guilds/{guild_id}: Update guild
+- [x] DELETE /guilds/{guild_id}: Delete guild
+- [x] GET /guilds/{guild_id}/invites: Get guild invites
+- [x] GET /guilds/{guild_id}/bans: Get guild bans
+- [x] GET /guilds/{guild_id}/bans/{user_id}: Get specific ban
+- [x] PUT /guilds/{guild_id}/bans/{user_id}: Create ban
+- [x] DELETE /guilds/{guild_id}/bans/{user_id}: Remove ban
+
+### Channel Handlers (/channels)
+- [x] POST /guilds/{guild_id}/channels: Create channel
+- [x] GET /guilds/{guild_id}/channels: Get guild channels
+- [x] GET /channels/{channel_id}: Get channel
+- [x] PATCH /channels/{channel_id}: Update channel
+- [x] DELETE /channels/{channel_id}: Delete channel
+- [x] POST /channels/{channel_id}/typing: Typing indicator
+
+### Message Handlers (/messages)
+- [x] POST /channels/{channel_id}/messages: Create message
+- [x] GET /channels/{channel_id}/messages: Get channel messages
+- [x] GET /channels/{channel_id}/messages/{message_id}: Get message
+- [x] PATCH /channels/{channel_id}/messages/{message_id}: Update message
+- [x] DELETE /channels/{channel_id}/messages/{message_id}: Delete message
+- [x] POST /channels/{channel_id}/messages/bulk-delete: Bulk delete messages
+
+### Member Handlers (/members)
+- [x] GET /guilds/{guild_id}/members: Get guild members
+- [x] GET /guilds/{guild_id}/members/{user_id}: Get member
+- [x] PATCH /guilds/{guild_id}/members/{user_id}: Update member
+- [x] DELETE /guilds/{guild_id}/members/{user_id}: Remove member
+- [x] DELETE /guilds/{guild_id}/members/@me: Leave guild
+- [x] PUT /guilds/{guild_id}/members/{user_id}/roles/{role_id}: Add role
+- [x] DELETE /guilds/{guild_id}/members/{user_id}/roles/{role_id}: Remove role
+
+### Role Handlers (/roles)
+- [x] POST /guilds/{guild_id}/roles: Create role
+- [x] GET /guilds/{guild_id}/roles: Get guild roles
+- [x] GET /guilds/{guild_id}/roles/{role_id}: Get role
+- [x] PATCH /guilds/{guild_id}/roles/{role_id}: Update role
+- [x] DELETE /guilds/{guild_id}/roles/{role_id}: Delete role
+
+### Reaction Handlers (/reactions)
+- [x] PUT /channels/{channel_id}/messages/{message_id}/reactions/{emoji}/@me: Add reaction
+- [x] DELETE /channels/{channel_id}/messages/{message_id}/reactions/{emoji}/@me: Remove own reaction
+- [x] DELETE /channels/{channel_id}/messages/{message_id}/reactions/{emoji}/{user_id}: Remove user reaction
+- [x] GET /channels/{channel_id}/messages/{message_id}/reactions/{emoji}: Get reactions
+- [x] DELETE /channels/{channel_id}/messages/{message_id}/reactions/{emoji}: Delete all reactions for emoji
+- [x] DELETE /channels/{channel_id}/messages/{message_id}/reactions: Delete all reactions
+
+### Invite Handlers (/invites)
+- [x] POST /channels/{channel_id}/invites: Create invite
+- [x] GET /channels/{channel_id}/invites: Get channel invites
+- [x] GET /invites/{invite_code}: Get invite (public)
+- [x] POST /invites/{invite_code}: Accept invite
+- [x] DELETE /invites/{invite_code}: Delete invite
+
+### Server Setup
+- [x] create_app(): Router creation with middleware
+- [x] create_app_state(): Initialize all dependencies
+  - DatabaseConfig construction from AppConfig
+  - RedisPoolConfig from AppConfig.redis
+  - JwtService initialization
+  - Snowflake generator
+  - All 10 repository instantiations
+  - ServiceContextBuilder with all dependencies
+- [x] run_server(): TcpListener and axum::serve
+- [x] run(): Full server startup from config
+- [x] main.rs: Entry point with tracing initialization
+
+Progress: 6/6 COMPLETE (OpenAPI deferred to separate PR)
 
 ## Phase 8: chat-gateway (WebSocket)
 - [ ] WebSocket server setup
@@ -295,7 +422,7 @@ Progress: 0/5
 
 ---
 
-**Overall Progress: Phase 6 of 9 COMPLETE**
+**Overall Progress: Phase 7 of 9 COMPLETE**
 
 **Database**: postgresql://postgres:***@localhost:5432/chat_db (14 tables)
 

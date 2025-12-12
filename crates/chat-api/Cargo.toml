@@ -39,6 +39,7 @@ validator = { workspace = true }
 
 # Error handling
 thiserror = { workspace = true }
+anyhow = { workspace = true }
 
 # Tracing
 tracing = { workspace = true }
@@ -46,6 +47,9 @@ tracing-subscriber = { workspace = true }
 
 # UUID
 uuid = { workspace = true }
+
+# Date/time
+chrono = { workspace = true }
 
 # OpenAPI
 utoipa = { workspace = true }

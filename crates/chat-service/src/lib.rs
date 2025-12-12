@@ -49,16 +49,22 @@ pub mod services;
 // Re-export DTOs
 pub use dto::{
     // Request types
-    CreateBanRequest, CreateChannelRequest, CreateGuildRequest, CreateInviteRequest,
-    CreateMessageRequest, CreateRoleRequest, LoginRequest, MessageReference, RefreshTokenRequest,
-    RegisterRequest, RolePosition, UpdateChannelRequest, UpdateGuildRequest, UpdateMemberRequest,
-    UpdateMessageRequest, UpdateRoleRequest, UpdateUserRequest,
+    AddReactionRequest, BulkDeleteMessagesRequest, CreateBanRequest, CreateChannelRequest,
+    CreateDmRequest, CreateGuildRequest, CreateInviteRequest, CreateMessageRequest,
+    CreateRoleRequest, LoginRequest, LogoutRequest, MessageReference, RefreshTokenRequest,
+    RegisterRequest, RolePosition, TypingRequest, UpdateChannelRequest, UpdateGuildRequest,
+    UpdateMemberRequest, UpdateMessageRequest, UpdatePresenceRequest, UpdateRoleRequest,
+    UpdateRolePositionsRequest, UpdateUserRequest,
     // Response types
-    AuthResponse, BanResponse, ChannelResponse, CurrentUserResponse, GuildResponse,
-    GuildWithCountsResponse, HealthResponse, InviteResponse, MemberResponse, MessageResponse,
-    PaginatedResponse, PresenceResponse, ReactionResponse, RoleResponse, UserResponse,
+    ApiResponse, AttachmentResponse, AuthResponse, BanResponse, ChannelResponse,
+    CurrentUserResponse, DmChannelResponse, GuildPreviewResponse, GuildResponse,
+    GuildWithCountsResponse, HealthChecks, HealthResponse, InviteChannelResponse, InviteMinimalResponse,
+    InviteResponse, MemberResponse, MessageReferenceResponse, MessageResponse, PaginatedResponse,
+    PaginationMeta, PresenceResponse, PublicUserResponse, ReactionResponse, ReadinessResponse,
+    RoleResponse, TypingResponse, UserResponse,
     // Helper types
     DmChannelWithRecipients, GuildWithCounts, InviteWithDetails, MemberWithUser, MessageWithDetails,
+    ReactionWithMeta,
 };
 
 // Re-export services
