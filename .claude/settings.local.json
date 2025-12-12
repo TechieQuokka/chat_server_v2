@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__github__search_repositories",
+      "mcp__postgres__query",
+      "Bash(cargo check:*)",
+      "mcp__filesystem__directory_tree",
+      "mcp__filesystem__list_directory"
+    ]
+  }
+}

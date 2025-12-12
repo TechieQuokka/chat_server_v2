@@ -1,0 +1,58 @@
+[package]
+name = "chat-api"
+description = "REST API server using Axum"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "chat-api"
+path = "src/main.rs"
+
+[dependencies]
+chat-core = { workspace = true }
+chat-common = { workspace = true }
+chat-service = { workspace = true }
+chat-db = { workspace = true }
+chat-cache = { workspace = true }
+
+# Web framework
+axum = { workspace = true }
+axum-extra = { workspace = true }
+tower = { workspace = true }
+tower-http = { workspace = true }
+
+# Async runtime
+tokio = { workspace = true }
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Validation
+validator = { workspace = true }
+
+# Error handling
+thiserror = { workspace = true }
+
+# Tracing
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+# UUID
+uuid = { workspace = true }
+
+# OpenAPI
+utoipa = { workspace = true }
+utoipa-swagger-ui = { workspace = true }
+
+# Configuration
+dotenvy = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true }

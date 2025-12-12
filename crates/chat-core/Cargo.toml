@@ -1,0 +1,24 @@
+[package]
+name = "chat-core"
+description = "Domain layer - entities, value objects, and traits"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+chrono = { workspace = true }
+bitflags = { workspace = true }
+validator = { workspace = true }
+async-trait = { workspace = true }
+rand = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true }
