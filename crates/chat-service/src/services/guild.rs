@@ -51,8 +51,8 @@ impl<'a> GuildService<'a> {
         // Create guild
         self.ctx.guild_repo().create(&guild).await?;
 
-        // Create @everyone role
-        let everyone_role = Role::everyone(guild_id, self.ctx.generate_id());
+        // Create @everyone role (id first, then guild_id)
+        let everyone_role = Role::everyone(self.ctx.generate_id(), guild_id);
         self.ctx.role_repo().create(&everyone_role).await?;
 
         // Create default "general" text channel

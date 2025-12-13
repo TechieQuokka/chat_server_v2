@@ -11,7 +11,7 @@ use chat_common::{CorsConfig, RateLimitConfig};
 use std::sync::Arc;
 use std::time::Duration;
 use tower::ServiceBuilder;
-use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
+use tower_governor::{governor::GovernorConfigBuilder, key_extractor::GlobalKeyExtractor, GovernorLayer};
 use tower_http::{
     cors::{AllowOrigin, Any, CorsLayer},
     request_id::{MakeRequestUuid, PropagateRequestIdLayer, SetRequestIdLayer},
@@ -72,11 +72,13 @@ pub fn apply_middleware_with_config(
     cors_config: &CorsConfig,
     is_production: bool,
 ) -> Router<AppState> {
-    // Create rate limiter configuration
+    // Create rate limiter configuration with GlobalKeyExtractor
+    // This applies rate limit globally (not per-IP) - suitable for local testing
     let governor_conf = Arc::new(
         GovernorConfigBuilder::default()
             .per_second(rate_limit_config.requests_per_second.into())
             .burst_size(rate_limit_config.burst)
+            .key_extractor(GlobalKeyExtractor)
             .finish()
             .expect("Failed to create rate limiter configuration"),
     );
