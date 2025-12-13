@@ -7,17 +7,15 @@ use axum::{routing::{delete, get, patch, post, put}, Router};
 use crate::handlers::{auth, channels, guilds, health, invites, members, messages, reactions, roles, users};
 use crate::state::AppState;
 
-/// Create the main API router with all routes
+/// Create the main API router with all routes (excluding health for separate middleware handling)
 pub fn create_router() -> Router<AppState> {
     Router::new()
-        // Health endpoints (no prefix)
-        .merge(health_routes())
         // API v1 endpoints
         .nest("/api/v1", api_v1_routes())
 }
 
-/// Health check routes
-fn health_routes() -> Router<AppState> {
+/// Health check routes (exported separately to bypass rate limiting)
+pub fn health_routes() -> Router<AppState> {
     Router::new()
         .route("/health", get(health::health_check))
         .route("/health/ready", get(health::readiness_check))

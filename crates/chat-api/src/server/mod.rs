@@ -19,23 +19,33 @@ use tokio::net::TcpListener;
 use tracing::info;
 
 use crate::middleware::apply_middleware_with_config;
-use crate::routes::create_router;
+use crate::routes::{create_router, health_routes};
 use crate::state::AppState;
 
 /// Build the complete Axum application with all routes and middleware
 ///
 /// Uses the new `apply_middleware_with_config` to enable rate limiting
 /// and environment-aware CORS configuration.
+///
+/// Health routes are added without rate limiting to allow container health
+/// checks to work properly (they don't have extractable client IPs).
 pub fn create_app(state: AppState) -> Router {
-    let router = create_router();
+    let api_router = create_router();
     let is_production = state.config().app.env.is_production();
-    let router = apply_middleware_with_config(
-        router,
+
+    // Apply rate limiting and other middleware to API routes
+    let api_router = apply_middleware_with_config(
+        api_router,
         &state.config().rate_limit,
         &state.config().cors,
         is_production,
     );
-    router.with_state(state)
+
+    // Merge health routes without rate limiting (for container health checks)
+    // Health routes are added after middleware so they bypass rate limiting
+    api_router
+        .merge(health_routes())
+        .with_state(state)
 }
 
 /// Initialize all dependencies and create AppState

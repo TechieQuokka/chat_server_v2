@@ -17,7 +17,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-2147483647}
       POSTGRES_DB: chat_db
     ports:
-      - "5433:5432"  # Host:Container - use 5433 to avoid conflict with native PostgreSQL
+      - "5433:5432" # Host:Container - use 5433 to avoid conflict with native PostgreSQL
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docs/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
@@ -69,6 +69,10 @@ services:
       # API Server
       API_HOST: 0.0.0.0
       API_PORT: 8080
+
+      # Gateway
+      GATEWAY_HOST: gateway
+      GATEWAY_PORT: 8081
 
       # Database
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-2147483647}@postgres:5432/chat_db
@@ -133,6 +137,10 @@ services:
       # Gateway Server
       GATEWAY_HOST: 0.0.0.0
       GATEWAY_PORT: 8081
+
+      # API Server (for internal communication)
+      API_HOST: api
+      API_PORT: 8080
 
       # Database
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-2147483647}@postgres:5432/chat_db
